@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CalibrationMethod3</class>
+ <widget class="QWidget" name="CalibrationMethod3">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>406</width>
+    <height>169</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>拟合标定</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>checkboard.ico</normaloff>checkboard.ico</iconset>
+  </property>
+  <widget class="QPushButton" name="collectCalibrationDataPushButton">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>191</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>采集标定图片</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="collectValidationDataPushButton">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>191</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>采集精度检验图片</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="collectSeamLaserStripeDataPushButton">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>10</y>
+     <width>181</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>采集焊缝轮廓结构管条纹图</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="returnSensorPushButton">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>70</y>
+     <width>181</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>复位</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="terminatePushButton">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>120</y>
+     <width>181</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>紧急停止</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
