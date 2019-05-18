@@ -26,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>焊缝跟踪系统-广东省焊接工程技术研究中心研</string>
+   <string>焊缝跟踪系统</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="font">
@@ -143,7 +143,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -221,7 +221,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -263,7 +263,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>450</x>
@@ -347,7 +347,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>360</x>
@@ -506,7 +506,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>210</x>
@@ -590,13 +590,13 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>130</x>
        <y>120</y>
        <width>68</width>
-       <height>171</height>
+       <height>182</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout5">
@@ -757,7 +757,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -1249,7 +1249,7 @@
      <x>0</x>
      <y>0</y>
      <width>1018</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -1403,9 +1403,7 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="SeamTrackingSys.qrc"/>
- </resources>
+ <resources/>
  <connections/>
  <slots>
   <slot>setXTravalDistance()</slot>

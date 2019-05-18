@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright: Guangdong Provincial Welding Technology Research Center
+Copyright: 
 Author: Li Yangjin
 Date: 2018-8-27
 Description:Camera模块封装了关于相机参数的设置，保存图片等功能。

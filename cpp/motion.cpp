@@ -1,5 +1,4 @@
 /*****************************************************************************
-Copyright: Guangdong Provincial Welding Technology Research Center
 Author: Li Yangjin
 Date: 2018-8-21
 Description:Motion类封装了弧焊平台各轴运动需要用到的函数，Run类函数是连续运动函数，Move

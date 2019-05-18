@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright: Guangdong Provincial Welding Technology Research Center
+Copyright: 
 Author: Li Yangjin
 Date: 2018-8-21
 Description:Motion类用来进行对平台进行手动控制，平台的坐标系如下图所示

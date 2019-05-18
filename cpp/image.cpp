@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright: Guangdong Provincial Welding Technology Research Center
+Copyright: 
 Author: Li Yangjin
 Date: 2018-8-27
 Description:ImagesAquisition类封装了关于图片的获取的相关内容。图片获取的硬件是JH300m

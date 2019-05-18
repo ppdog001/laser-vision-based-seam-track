@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright: Guangdong Provincial Welding Technology Research Center
+Copyright: 
 Author: Li Yangjin
 Date: 2018-8-27
 Description:Dip_AutoTracking类封装了图像处理的功能和实时跟踪的功能。调用Dip_Auto

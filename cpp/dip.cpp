@@ -1,5 +1,5 @@
 /*****************************************************************************
-Copyright: Guangdong Provincial Welding Technology Research Center
+Copyright:
 Author: Li Yangjin
 Date: 2018-8-22
 Description:DIP类对传感图像进行图像处理和特征点识别。其输入时Mat类型图形
