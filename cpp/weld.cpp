@@ -1,146 +1,203 @@
+/******************************************************************************
+  File name: weld.h
+  Author: WillLi99		Date:2019-5-21
+  Description:
+              定义了Weld类，此类继承于QWidget，负责配置焊接参数。此文件为类Weld的实现。               
+  Others: 
+  Function List:
+             Weld
+			 ~Weld
+			 on_confirmPushButton_clicked	//检查焊接参数合法性，无误后传给mainwindow
+			 on_cancelPushButton_clicked	//退出界面
+			 setDefaultParameters			//设置默认的焊接参数
+			 checkParameters				//检测填入lineEdit的参数是否合理
+
+			 updateWeldParameters_triggled	//传递焊接参数
+  History: 
+          <author>		<time>       <desc>
+           WillLi99    2019-5-21    添加weld.h头部注释
+******************************************************************************/
 #include "weld.h"
 
-
+/******************************************************************************
+  Function:Weld
+  Description:
+  Calls: 
+  Called By:
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 Weld::Weld(QWidget *parent)
 {
 	ui.setupUi(this);
 	setDefaultParameters();
 }
 
-
+/******************************************************************************
+  Function:~Weld
+  Description:
+  Calls: 
+  Called By:
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 Weld::~Weld(void)
 {
 }
 
-/***********************************************************************
-@函数名：on_confirmPushButton_clicked
-@参数：无
-@返回值：无
-@功能：响应焊接参数设置界面的“确认”按钮，并将焊接参数传给主UI
-@修改信息：
-***********************************************************************/
+/******************************************************************************
+  Function:setDefaultParameters
+  Description:设置默认的焊接参数。
+  Calls: 
+  Called By:
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Weld::setDefaultParameters()
+{
+	dWeldSpeed=2.0;
+	dWireRate=2.0;
+	dGasFlow=0.5;
+	dWeldVoltage=25.0;
+	dWeldCurrent=100.0;
+
+	ui.lineEditWeldSpeed->setText(QString::number(dWeldSpeed));
+	ui.lineEditWireRate->setText(QString::number(dWireRate));
+	ui.lineEditGasFlow->setText(QString::number(dGasFlow));
+	ui.lineEditWeldVoltage->setText(QString::number(dWeldVoltage));
+	ui.lineEditWeldCurrent->setText(QString::number(dWeldCurrent));
+}
+
+/******************************************************************************
+  Function:checkWeldParameters
+  Description:检查焊接参数合理性。返回true表示检查通过，返回false表示检查不通过
+  Calls: 
+  Called By:
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+bool Weld::checkWeldParameters()
+{
+	QString str1,str2,str3,str4,str5,str6;
+
+	str1=ui.lineEditWeldSpeed->text();
+	str2=ui.lineEditWireRate->text();
+	str3=ui.lineEditWeldCurrent->text();
+	str4=ui.lineEditWeldVoltage->text();
+	str5=ui.lineEditWeldCurrent->text();
+	str6=ui.lineEditWeldDistance->text();
+
+	dWeldSpeed=str1.toDouble();
+	dWireRate=str2.toDouble();
+	dGasFlow=str3.toDouble();
+	dWeldVoltage=str4.toDouble();
+	dWeldCurrent=str5.toDouble();
+	dWeldDistance=str6.toDouble();
+
+	//检查
+	if(dWeldSpeed==0.0)
+	{
+		QMessageBox msgbox;
+		msgbox.setText(QStringLiteral("焊接速度格式不正确，请更正！"));
+		msgbox.exec();
+		return false;
+	}
+
+	if(dWireRate==0.0)
+	{
+		QMessageBox msgbox;
+		msgbox.setText(QStringLiteral("送丝速度格式不正确，请更正！"));
+		msgbox.exec();
+		return false;
+	}
+
+	if(dGasFlow==0.0)
+	{
+		QMessageBox msgbox;
+		msgbox.setText(QStringLiteral("保护气流量格式不正确，请更正！"));
+		msgbox.exec();
+		return false;
+	}
+
+	if(dWeldVoltage==0.0)
+	{
+		QMessageBox msgbox;
+		msgbox.setText(QStringLiteral("焊接电压格式不正确，请更正！"));
+		msgbox.exec();
+		return false;
+	}
+
+	if(dWeldCurrent==0.0)
+	{
+		QMessageBox msgbox;
+		msgbox.setText(QStringLiteral("焊接电流格式不正确，请更正！"));
+		msgbox.exec();
+		return false;
+	}
+
+	if(dWeldDistance==0.0)
+	{
+		QMessageBox msgbox;
+		msgbox.setText(QStringLiteral("焊接长度格式不正确，请更正！"));
+		msgbox.exec();
+		return false;
+	}
+	
+	//经过排查，没有问题，即可保存相关的参数
+	wpWeldParameter.dWeldSpeed=dWeldSpeed;
+	wpWeldParameter.dWireRate=dWireRate;
+	wpWeldParameter.dGasFlow=dGasFlow;
+	wpWeldParameter.dWeldVoltage=dWeldVoltage;
+	wpWeldParameter.dWeldCurrent=dWeldCurrent;
+	wpWeldParameter.dWeldDistance=dWeldDistance;
+
+	return true;
+}
+
+/******************************************************************************
+  Function:on_confirmPushButton_clicked
+  Description:
+  Calls: 
+  Called By:
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 void Weld::on_confirmPushButton_clicked()
 {
-	int checkResult=checkParameters();
+	bool checkResult=checkWeldParameters();
 	
-	if(checkResult==1)	//检查通过，emit焊接参数
+	if(checkResult==true)	//检查通过，emit焊接参数
 	{
-		emit updateWeldParameters_triggled(parameters);
+		emit updateWeldParameters_triggered(wpWeldParameter);
 		close();
 	}
-	else if(checkResult==-1)
+	else if(checkResult==false)
 	{
 		return;
 	}
 }
 
+/******************************************************************************
+  Function:on_cancelPushButton_clicked
+  Description:退出设置界面
+  Calls: 
+  Called By:
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 void Weld::on_cancelPushButton_clicked()
 {
 	close();
-}
-
-/***********************************************************************
-@函数名：setDefaultParameters
-@参数：无
-@返回值：无
-@功能：设置默认的焊接参数，并填充响相应的LineEdit
-@修改信息：
-***********************************************************************/
-void Weld::setDefaultParameters()
-{
-	weldSpeed=2.0;
-	wireFeedRate=2.0;
-	sheildingGasFlow=0.5;
-	weldVoltage=25.0;
-	weldCurrent=100.0;
-
-	ui.weldSpeedLineEdit->setText(QString::number(weldSpeed));
-	ui.wireFeedRateLineEdit->setText(QString::number(wireFeedRate));
-	ui.sheildingGasFlowLineEdit->setText(QString::number(sheildingGasFlow));
-	ui.weldVoltageLineEdit->setText(QString::number(weldVoltage));
-	ui.weldCurrentLineEdit->setText(QString::number(weldCurrent));
-}
-
-/***********************************************************************
-@函数名：checkParameters
-@参数：无
-@返回值：返回1表示检查通过，返回-1表示检查不通过
-@功能：检查参数是否合格，若合格就存入相应的数值，不合格则弹出窗口提醒
-@修改信息：
-***********************************************************************/
-int Weld::checkParameters()
-{
-	QString str1,str2,str3,str4,str5,str6;
-	
-	str1=ui.weldSpeedLineEdit->text();
-	str2=ui.wireFeedRateLineEdit->text();
-	str3=ui.sheildingGasFlowLineEdit->text();
-	str4=ui.weldVoltageLineEdit->text();
-	str5=ui.weldCurrentLineEdit->text();
-	str6=ui.trackingDistanceLineEdit->text();
-	
-	weldSpeed=str1.toDouble();
-	wireFeedRate=str2.toDouble();
-	sheildingGasFlow=str3.toDouble();
-	weldVoltage=str4.toDouble();
-	weldCurrent=str5.toDouble();
-	trackingDistance=str6.toDouble();
-
-	//检查
-	if(weldSpeed==0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("焊接速度格式不正确，请更正！"));
-		msgbox.exec();
-		return -1;
-	}
-
-	if(wireFeedRate==0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("送丝速度格式不正确，请更正！"));
-		msgbox.exec();
-		return -1;
-	}
-
-	if(sheildingGasFlow==0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("保护气流量格式不正确，请更正！"));
-		msgbox.exec();
-		return -1;
-	}
-
-	if(weldVoltage==0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("焊接电压格式不正确，请更正！"));
-		msgbox.exec();
-		return -1;
-	}
-
-	if(weldCurrent==0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("焊接电流格式不正确，请更正！"));
-		msgbox.exec();
-		return -1;
-	}
-
-	if(trackingDistance==0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("焊接长度格式不正确，请更正！"));
-		msgbox.exec();
-		return -1;
-	}
-	//经过排查，没有问题，即可保存相关的参数
-	parameters.weldSpeed=weldSpeed;
-	parameters.wireFeedRate=wireFeedRate;
-	parameters.sheildingGasFlow=sheildingGasFlow;
-	parameters.weldVoltage=weldVoltage;
-	parameters.weldCurrent=weldCurrent;
-	parameters.trackingDistance=trackingDistance;
-	
-	return 1;
 }

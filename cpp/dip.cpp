@@ -1,19 +1,36 @@
-/*****************************************************************************
-Copyright:
-Author: Li Yangjin
-Date: 2018-8-22
-Description:DIP类对传感图像进行图像处理和特征点识别。其输入时Mat类型图形
-，输出焊缝中心和预设中心得偏差。由于openCV和QT包含了不同的图像类型，DIP类
-还提供了Mat和QImage格式转换的相关接口。
+/******************************************************************************
+  File name: dip.cpp
+  Author: WillLi99		Date:2019-6-6
+  Description: 定义图像处理类，其任务是处理结构光图像，获得ROI细化图像和计算一些焊缝数据。
+			算法流程：转化为灰度图-裁剪ROI-滤波-细化-特征点提取和计算-输出。
+  Others: 
+  Function List:
+				DIP				//DIP类构造函数
+				getImageSize	//获得原始图像尺寸
+				getGrayImage	//获得原始图的灰度图
+				getROI			//截取ROI
+  				getWeldSeamType				//焊缝类型分类
+  				processLaserStripeImage		//处理激光条纹图像
+  				filterLaserStripeImage		//激光条纹图像滤波
+  				thinLaserStripeImage		//激光条纹图像细化
+  				fitLaserStripeImage			//激光条纹图像拟合
+  				findFittingData				//查找用来拟合的数据
+  				findFeaturePoints			//定位焊缝特征点
+  				updateLastFrame				//更新lastFrame
+				generateOutImage			//产生输出图像
+  				generateOffset				//产出焊缝偏差
+  				generateDIPResult			//产出图像计算结果
+  				qImage2Mat					
+  				mat2QImage
+				getROIPosition				//计算ROI位置
+				det							//求两个向量组成矩阵的行列式
+				drawDashLine				//画虚线
+				drawAsterisk				//标星
 
-特征点提取算法:
-	1.裁剪ROI
-	2.滤波（包括图像滤波、弧光信息去除等）
-	3.直线拟合（要包括细化）
-	4.图像变换（前提是结构光条纹线大体保持水平）
-	5.特征点提取
-
-*****************************************************************************/
+  History: 
+          <author>		<time>       <desc>
+           WillLi99    2019-6-6     添加dip.cpp头部注释
+******************************************************************************/
 #include "time.h"
 #include "dip.h"
 
@@ -22,12 +39,12 @@ int DIP::roiX=0;
 int DIP::roiY=0;
 int DIP::nth=0;
 
-
 /*****************************************************************************
-Function:void DIP(Mat& recImg)
+Function:DIP
 Description:对传入图形进行处理
 Call:
-Input:recImg-待处理的图像
+Called By:
+Input:receivedImage-待处理的图像
 Output:
 Return:
 Others:
@@ -39,9 +56,12 @@ DIP::DIP(Mat receivedImage)
 	processLaserStripeImage();
 }
 
+
 /*****************************************************************************
-Function:void DIP::getImageSize()
-Description:获得原图尺寸
+Function:getImageSize
+Description: 获得原始图像的尺寸
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -54,12 +74,13 @@ void DIP::getImageSize()
 }
 
 /*****************************************************************************
-Function:void DIP::getROI()
-Description:裁剪原图,获得ROI区域，是为了降低运算量。根据投影自适应地裁剪原图，产生大小
-	为400*100的ROI图。
+Function:getROI
+Description: 裁剪原图,获得ROI区域，是为了降低运算量。根据投影分布裁剪原图，产生大小
+		为400*100的ROI图。
+Call:
+Called By:
 Input:
-Output:总体上，获得了roi,roiWidth，roiHeight
-	这些内容。
+Output:
 Return:
 Others:
 *****************************************************************************/
@@ -72,8 +93,10 @@ void DIP::getROI()
 }
 
 /*****************************************************************************
-Function:void DIP::getGrayImage()
-Description:生成灰度图
+Function:getGrayImage
+Description: 获得灰度图像
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -85,13 +108,14 @@ void DIP::getGrayImage()
 	cvtColor(image, gray, CV_BGR2GRAY);
 }
 
-
 /*****************************************************************************
-Function:void DIP::thinLaserStripeImage()
-Description:细化图像
-Input:filteredImage
+Function:thinLaserStripeImage
+Description: 获得细化图像
+Call:
+Called By:
+Input:
 Output:thinnedImage，其为对filteredImage进行细化后的图像。binImageOTSU为利用OTSU
-	自动阈值分割得到的二值图像
+		自动阈值分割得到的二值图像
 Return:
 Others:
 *****************************************************************************/
@@ -124,11 +148,13 @@ void DIP::thinLaserStripeImage()
 
 /*****************************************************************************
 Function:findFittingData
-Description:从thinnedImage中寻找用来做直线拟合的数据点。注意：具体返回多少组数据点，和焊缝类型有关
-Input:linePoints
-Output:fittedLineEquation，即为拟合后的直线方程
+Description: 从thinnedImage中寻找用来做直线拟合的数据点。
+Call:
+Called By:
+Input:
+Output:
 Return:
-Others:
+Others:注意：具体返回多少组数据点，和焊缝类型有关
 *****************************************************************************/
 PointMat DIP::findFittingData()
 {
@@ -136,7 +162,7 @@ PointMat DIP::findFittingData()
 	Points points;
 	switch(seam)
 	{
-	case BUTT_WELD:
+	case BUTT_WELD_SEAM:
 		for(int i=roiHeight/2-5;i<=roiHeight/2+5;i++)
 		{
 			uchar* ptr=thinnedImage.ptr<uchar>(i);
@@ -151,24 +177,22 @@ PointMat DIP::findFittingData()
 
 		pointsSet.push_back(points);	
 		break;
-	case LAP_WElD:
+	case LAP_WELD_SEAM:
 		break;
-	case GROOVE_WELD:
+	case GROOVE_WELD_SEAM:
 		break;
 	}
 
 	return pointsSet;
 }
 
-
-
-
-
 /*****************************************************************************
-Function:void DIP::fitLaserStripeImage()
-Description:直线拟合。注意：具体要拟合多少条直线，和焊缝类型有关
-Input:linePoints
-Output:fittedLineEquation，即为拟合后的直线方程
+Function:fitLaserStripeImage
+Description: 线性拟合
+Call:
+Called By:
+Input:
+Output:
 Return:
 Others:
 *****************************************************************************/
@@ -181,18 +205,21 @@ void DIP::fitLaserStripeImage()
 
 }
 
+
 /*****************************************************************************
-Function:void DIP::findFeaturePoints()
-Description:找焊缝特征点。利用道格拉斯算法从thinnedImageInfo获得焊缝特征点
+Function:findFeaturePoints
+Description: 定位焊缝特征点，不同的焊缝有不同的特征点数量和定位方法。
+Call:
+Called By:
 Input:
 Output:
-Return:返回找到的焊缝特征点，对于对接焊缝，返回两个特征点
+Return:
 Others:
 *****************************************************************************/
 void DIP::findFeaturePoints()
 {
 	//用Douglas–Peucker算法获得焊缝特征点
-	if(seam==BUTT_WELD)
+	if(seam==BUTT_WELD_SEAM)
 	{
 		int width=thinnedImageInfo.cols;
 		Point2i vertexPoint;
@@ -284,8 +311,10 @@ void DIP::findFeaturePoints()
 }
 
 /*****************************************************************************
-Function:void DIP::generateOutImage()
-Description:产生Out图，此图片含有拟合出来的直线和焊缝特征点
+Function:generateOutImage
+Description: 
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -331,8 +360,10 @@ void DIP::generateOutImage()
 
 
 /*****************************************************************************
-Function:generateOffset()
-Description:计算偏差,此偏差用于进行运动控制
+Function:generateOffset
+Description: 
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -347,11 +378,13 @@ void DIP::generateOffset()
 
 
 /*****************************************************************************
-Function:Mat DIP:: qImage2Mat(QImage in)
-Description:QImage to Mat
-Input:in-QImage类型的图像
+Function:qImage2Mat
+Description: 
+Call:
+Called By:
+Input:
 Output:
-Return:matImg-Mat类型的图像
+Return:
 Others:
 *****************************************************************************/
 Mat DIP:: qImage2Mat(QImage in)
@@ -374,11 +407,13 @@ Mat DIP:: qImage2Mat(QImage in)
 }
 
 /*****************************************************************************
-Function:QImage DIP::mat2QImage(Mat& in)
-Description:Mat to QImage
-Input:in-Mat类型的图像
+Function:mat2QImage
+Description: 
+Call:
+Called By:
+Input:
 Output:
-Return:out-QImage类型的图像
+Return:
 Others:
 *****************************************************************************/
 QImage DIP::mat2QImage(Mat& in)
@@ -400,8 +435,10 @@ QImage DIP::mat2QImage(Mat& in)
 
 
 /*****************************************************************************
-Function:getWeldSeamType()
-Description:焊缝图像分类
+Function:getWeldSeamType
+Description: 
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -409,15 +446,14 @@ Others:
 *****************************************************************************/
 void DIP::getWeldSeamType()
 {
-	seam=BUTT_WELD;
+	seam=BUTT_WELD_SEAM;
 }
 
 /*****************************************************************************
-Function:DIP::processLaserStripeImage()
-Description:根据焊缝的不同类型，采用不同的处理办法
-
-	包括1. 裁剪ROI、2.滤波、3.直线拟合、4.图像变换、5.特征点提取
-
+Function:processLaserStripeImage
+Description: 
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -431,7 +467,7 @@ void DIP::processLaserStripeImage()
 	getWeldSeamType();	//分类
 	switch(seam)
 	{
-		case BUTT_WELD:
+		case BUTT_WELD_SEAM:
 			filterLaserStripeImage(0);
 			thinLaserStripeImage();	
 			findFeaturePoints();	
@@ -440,18 +476,21 @@ void DIP::processLaserStripeImage()
 			generateDIPResult();
 			updateLastFrame();
 			break;
-		case LAP_WElD:
+		case LAP_WELD_SEAM:
 			break;
-		case GROOVE_WELD:
+		case GROOVE_WELD_SEAM:
 			break;
 	}
 }
 
 /*****************************************************************************
-Function:void DIP::filterLaserStripeImage()
-Description：先对相邻两帧结构光传感图像进行“与”操作，再对结构光条纹图像进行滤波
+Function:filterLaserStripeImage
+Description: 先对相邻两帧结构光传感图像进行“与”操作，再对结构光条纹图像进行滤波
 Input:method=0---33中值滤波；=1---55中值滤波；=2---15开运算；=3---37开运算
-Output:filteredImage，其表示滤波后的图像
+Call:
+Called By:
+Input:
+Output:
 Return:
 Others:
 *****************************************************************************/
@@ -503,19 +542,29 @@ void DIP::filterLaserStripeImage(int method)
 
 }
 
-
-
+/*****************************************************************************
+Function:generateDIPResult
+Description: 
+Call:
+Called By:
+Input:
+Output:
+Return:
+Others:
+*****************************************************************************/
 void DIP::generateDIPResult()
 {
-	seaminfo.weldSeamOffset=offset;
-	seaminfo.torchHeight=-1;
+	seaminfo.dWeldSeamOffset=offset;
+	seaminfo.dRemainingHeight=-1;
 	seaminfo.weldSeamType=seam;
-	seaminfo.weldSeamWidth=abs(featurePoints[0].x-featurePoints[1].x);
+	seaminfo.dWeldSeamWidth=abs(featurePoints[0].x-featurePoints[1].x);
 }
 
 /*****************************************************************************
 Function:getROIPosition
-Description:用于获取图像ROI截取位置
+Description: 
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -554,7 +603,9 @@ void DIP::getROIPosition(Mat& image,int* ROIX,int* ROIY)
 
 /*****************************************************************************
 Function:updateLastFrame
-Description:用于获取上一帧的结构光条纹图像
+Description: 用于获取上一帧的结构光条纹图像
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -568,6 +619,8 @@ void DIP::updateLastFrame()
 /*****************************************************************************
 Function:det
 Description:求两个向量的行列式
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -583,6 +636,8 @@ double DIP::det(Point2i a,Point2i b)
 /*****************************************************************************
 Function:drawDashLine
 Description:画虚线
+Call:
+Called By:
 Input:
 Output:
 Return:
@@ -609,6 +664,8 @@ void DIP::drawDashLine(Mat& image,Point pt1, Point pt2,Scalar& color,int thickne
 /*****************************************************************************
 Function:drawAsterisk
 Description:标星
+Call:
+Called By:
 Input:
 Output:
 Return:

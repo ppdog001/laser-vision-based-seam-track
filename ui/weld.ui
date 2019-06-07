@@ -19,283 +19,251 @@
   <property name="windowTitle">
    <string>焊接参数设置</string>
   </property>
-  <widget class="QLabel" name="weldingVoltage">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>110</y>
-     <width>54</width>
-     <height>12</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>焊接电压：</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="weldingCurrent">
-   <property name="geometry">
-    <rect>
-     <x>260</x>
-     <y>110</y>
-     <width>54</width>
-     <height>12</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>焊接电流：</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="weldVoltageLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>110</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>25.0</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="weldCurrentLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>330</x>
-     <y>110</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>100.0</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="unit5">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>110</y>
-     <width>54</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>伏（V)</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="unit6">
-   <property name="geometry">
-    <rect>
-     <x>420</x>
-     <y>110</y>
-     <width>54</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>安（A)</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="wireFeedRateTextLabel">
-   <property name="geometry">
-    <rect>
-     <x>260</x>
-     <y>70</y>
-     <width>54</width>
-     <height>12</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>送丝速度：</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="wireFeedRateLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>330</x>
-     <y>70</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>2.0</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="unit4">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>70</y>
-     <width>81</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>米/分（m/min)</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="gasFlowTextLabel">
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>setting_72px.ico</normaloff>setting_72px.ico</iconset>
+  </property>
+  <widget class="QWidget" name="layoutWidget1">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>70</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>保护气流量：</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="sheildingGasFlowLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>70</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>0.5</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="unit3">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>70</y>
+     <y>5</y>
      <width>81</width>
-     <height>20</height>
+     <height>141</height>
     </rect>
    </property>
-   <property name="text">
-    <string>升/分（L/min)</string>
-   </property>
+   <layout class="QVBoxLayout" name="verticalLayout1">
+    <item>
+     <widget class="QLabel" name="labelWeldSpeed">
+      <property name="text">
+       <string>焊接速度：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelGasFlow">
+      <property name="text">
+       <string>保护气流量：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelWeldVoltage">
+      <property name="text">
+       <string>焊接电压：</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QPushButton" name="confirmPushButton">
+  <widget class="QWidget" name="layoutWidget2">
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>150</y>
-     <width>111</width>
+     <x>90</x>
+     <y>0</y>
+     <width>71</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout2">
+    <item>
+     <widget class="QLineEdit" name="lineEditWeldSpeed">
+      <property name="text">
+       <string>2.0</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="lineEditGasFlow">
+      <property name="text">
+       <string>0.5</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="lineEditWeldVoltage">
+      <property name="text">
+       <string>25.0</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget3">
+   <property name="geometry">
+    <rect>
+     <x>169</x>
+     <y>10</y>
+     <width>81</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout3">
+    <item>
+     <widget class="QLabel" name="unit1">
+      <property name="text">
+       <string>毫米（mm/s)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="unit3">
+      <property name="text">
+       <string>升/分（L/min)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="unit5">
+      <property name="text">
+       <string>伏（V)</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget4">
+   <property name="geometry">
+    <rect>
+     <x>261</x>
+     <y>10</y>
+     <width>62</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout4">
+    <item>
+     <widget class="QLabel" name="labelWeldDistance">
+      <property name="text">
+       <string>焊接长度：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelWireRate">
+      <property name="text">
+       <string>送丝速度：</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="labelWeldCurrent">
+      <property name="text">
+       <string>焊接电流：</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget5">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>0</y>
+     <width>81</width>
+     <height>151</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout5">
+    <item>
+     <widget class="QLineEdit" name="lineEditWeldDistance">
+      <property name="text">
+       <string>100.0</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="lineEditWireRate">
+      <property name="text">
+       <string>2.0</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="lineEditWeldCurrent">
+      <property name="text">
+       <string>100.0</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget6">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>10</y>
+     <width>80</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout6">
+    <item>
+     <widget class="QLabel" name="unit2">
+      <property name="text">
+       <string>毫米（mm)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="unit4">
+      <property name="text">
+       <string>米/分（m/min)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="unit6">
+      <property name="text">
+       <string>安（A)</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>160</y>
+     <width>211</width>
      <height>31</height>
     </rect>
    </property>
-   <property name="text">
-    <string>确定</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="cancelPushButton">
-   <property name="geometry">
-    <rect>
-     <x>380</x>
-     <y>150</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>取消</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="weldingRateTextLabel">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>25</y>
-     <width>61</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>焊接速度：</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="weldSpeedLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>30</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>2.0</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="unit1">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>30</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>毫米（mm/s)</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="trackingDistanceLabel">
-   <property name="geometry">
-    <rect>
-     <x>260</x>
-     <y>30</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>焊接长度：</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="trackingDistanceLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>330</x>
-     <y>30</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>100.0</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="unit2">
-   <property name="geometry">
-    <rect>
-     <x>420</x>
-     <y>30</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>毫米（mm)</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QPushButton" name="confirmPushButton">
+      <property name="text">
+       <string>确定</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButtonCancel">
+      <property name="text">
+       <string>取消</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

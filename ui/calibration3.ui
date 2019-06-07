@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CalibrationMethod3</class>
- <widget class="QWidget" name="CalibrationMethod3">
+ <class>Calibration3</class>
+ <widget class="QWidget" name="Calibration3">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,13 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>拟合标定</string>
+   <string>标定方法3-拟合标定</string>
   </property>
   <property name="windowIcon">
    <iconset>
     <normaloff>checkboard.ico</normaloff>checkboard.ico</iconset>
   </property>
-  <widget class="QPushButton" name="collectCalibrationDataPushButton">
+  <widget class="QPushButton" name="pushButtonCollectCalibrationData">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -30,7 +30,7 @@
     <string>采集标定图片</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="collectValidationDataPushButton">
+  <widget class="QPushButton" name="pushButtonCollectValidationData">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -43,7 +43,7 @@
     <string>采集精度检验图片</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="collectSeamLaserStripeDataPushButton">
+  <widget class="QPushButton" name="pushButtonCollectSeamLaserStripeData">
    <property name="geometry">
     <rect>
      <x>220</x>
@@ -56,7 +56,7 @@
     <string>采集焊缝轮廓结构管条纹图</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="returnSensorPushButton">
+  <widget class="QPushButton" name="pushButtonRecoverSensorPosition">
    <property name="geometry">
     <rect>
      <x>220</x>
@@ -69,7 +69,7 @@
     <string>复位</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="terminatePushButton">
+  <widget class="QPushButton" name="pushButtonTerminate">
    <property name="geometry">
     <rect>
      <x>220</x>

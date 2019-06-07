@@ -1,54 +1,99 @@
-/*****************************************************************************
-Copyright: 
-Author: Li Yangjin
-Date: 2018-8-27
-Description:Camera模块封装了关于相机参数的设置，保存图片等功能。
-*****************************************************************************/
+/******************************************************************************
+  File name: camera.cpp
+  Author: WillLi99		Date:2019-5-18
+  Description: 实现Camera类，Camera类的功能为实现调节相机成像。
+  Others: 
+  Function List:
+				1. Camera
+  				2. ~Camera
+  				3. on_pushButtonWhiteBalance_clicked				//一键白平衡
+  				4. on_pushButtonLoadCameraConfiguration_clicked		//载入相机配置
+  				5. on_pushButtonSaveCameraConfiguration_clicked		//保存相机配置
+  				6. on_pushButtonSaveSingleImage_clicked				//保存单张图片
+  				7. on_pushButtonSaveMultipleImages_clicked			//保存多张图像
+  				8. on_pushButtonStopSavingMultipleImages_clicked	//停止保存图像
+  				9. on_horizontalSliderGamma_valueChanged			//改变gamma值
+  				10. on_horizontalSliderContrast_valueChanged		//改变对比度
+  				11. on_horizontalSliderGain_valueChanged			//改变相机增益
+  				12. on_horizontalSliderExposure_valueChanged		//改变曝光值
+  				13  on_checkBoxGain_toggled			//自动增益
+  				14. on_checkBoxExposure_toggled		//自动曝光
+  				15. initializeParamters				//初始化配置
+  History: 
+          <author>		<time>       <desc>
+           WillLi99    2019-5-18     添加camra.h头部注释
+******************************************************************************/
 
 #include "JHCap.h"
 #include "camera.h"
 
+/******************************************************************************
+  Function:Camera
+  Description:
+  Calls: 
+  Called By: tracksys.cpp
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 Camera::Camera(QWidget *parent):
 QWidget(parent)
 {
 	ui.setupUi(this);
-	cameraIndex=0;
+	intCameraIndex=0;
 }
 
+/******************************************************************************
+  Function:~Camera
+  Description:
+  Calls: 
+  Called By:
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 Camera::~Camera()
 {
 
 }
 
-/***********************************************************************
-@函数名：onWBClicked
-@参数：无
-@返回值：无
-@功能：一键白平衡
-@修改信息：
-***********************************************************************/
-void Camera::on_wbPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonWhiteBalance_clicked
+  Description: 一键白平衡
+  Calls: JHCap.h/CameraOnePushWB
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_pushButtonWhiteBalance_clicked()
 {
-	CameraOnePushWB(cameraIndex);
+	CameraOnePushWB(intCameraIndex);
 }
 
-/***********************************************************************
-@函数名：on_loadCameraParasPushButton_clicked
-@参数：无
-@返回值：无
-@功能：加载相机参数
-@修改信息：
-***********************************************************************/
-void Camera::on_loadCameraParasPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonLoadCameraConfiguration_clicked
+  Description: 加载位于../camera目录下的xml相机配置文件
+  Calls: QFileDialog等
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_pushButtonLoadCameraConfiguration_clicked()
 {
-	QString fileName=QFileDialog::getOpenFileName(this,"Open XML","..\\camera",
+	QString qstrFileName=QFileDialog::getOpenFileName(this,"Open XML","..\\camera",
 		"XML Files (*.xml)");
-	if(fileName.isEmpty()==false)
+	if(qstrFileName.isEmpty()==false)
 	{
-		QFile file(fileName);
+		QFile file(qstrFileName);
 		if(!file.open(QFile::ReadOnly|QFile::Text))
 		{
-			std::cerr<<"Error::Cannot read file"<<qPrintable(fileName)
+			std::cerr<<"Error::Cannot read file"<<qPrintable(qstrFileName)
 				<<":"<<qPrintable(file.errorString())<<std::endl;
 		}
 
@@ -68,19 +113,19 @@ void Camera::on_loadCameraParasPushButton_clicked()
 				}
 				else if(xmlReader.name()=="Gamma")
 				{
-					ui.gammaHS->setValue(xmlReader.readElementText().toInt());
+					ui.horizontalSliderGamma->setValue(xmlReader.readElementText().toInt());
 				}
 				else if(xmlReader.name()=="Contrast")
 				{
-					ui.contrastHS->setValue(xmlReader.readElementText().toInt());
+					ui.horizontalSliderContrast->setValue(xmlReader.readElementText().toInt());
 				}
 				else if(xmlReader.name()=="Gain")
 				{
-					ui.hsGain->setValue(xmlReader.readElementText().toInt());
+					ui.horizontalSliderGain->setValue(xmlReader.readElementText().toInt());
 				}
 				else if(xmlReader.name()=="Exposure")
 				{
-					ui.exposureHS->setValue(xmlReader.readElementText().toInt());
+					ui.horizontalSliderExposure->setValue(xmlReader.readElementText().toInt());
 				}
 			}
 		}
@@ -94,20 +139,23 @@ void Camera::on_loadCameraParasPushButton_clicked()
 	}
 }
 
-/***********************************************************************
-@函数名：on_saveCameraParasPushButton_clicked
-@参数：无
-@返回值：无
-@功能：保存相机参数
-@修改信息：
-***********************************************************************/
-void Camera::on_saveCameraParasPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonSaveCameraConfiguration_clicked
+  Description: 保存当前的相机配置
+  Calls: QFileDialog等
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_pushButtonSaveCameraConfiguration_clicked()
 {
-	QString fileName=QFileDialog::getSaveFileName(this,"Save XML",".","XML Files (*.xml)");
+	QString qstrFileName=QFileDialog::getSaveFileName(this,"Save XML",".","XML Files (*.xml)");
 	
-	if(fileName.isEmpty()==false)
+	if(qstrFileName.isEmpty()==false)
 	{
-		QFile file(fileName);
+		QFile file(qstrFileName);
 		file.open(QIODevice::WriteOnly);
 
 		QXmlStreamWriter xmlWriter(&file);
@@ -115,21 +163,21 @@ void Camera::on_saveCameraParasPushButton_clicked()
 		xmlWriter.writeStartDocument();
 
 		xmlWriter.writeStartElement(QStringLiteral("相机参数"));
-		xmlWriter.writeTextElement("Gamma",QString::number(ui.gammaHS->value()));
-		xmlWriter.writeTextElement("Contrast",QString::number(ui.gammaHS->value()));
+		xmlWriter.writeTextElement("Gamma",QString::number(ui.horizontalSliderGamma->value()));
+		xmlWriter.writeTextElement("Contrast",QString::number(ui.horizontalSliderGamma->value()));
 
-		int gain;
-		if(API_OK==CameraGetGain(cameraIndex,&gain));
-		else gain=0;
-		xmlWriter.writeTextElement("Gain",ui.gainCheckBox->isChecked()?QString::number(gain):QString
-			::number(ui.hsGain->value()));
+		int intGain;
+		if(API_OK==CameraGetGain(intCameraIndex,&intGain));
+		else intGain=0;
+		xmlWriter.writeTextElement("Gain",ui.checkBoxGain->isChecked()?QString::number(intGain):QString
+			::number(ui.horizontalSliderGain->value()));
 
-		int exposure;
-		if(API_OK==CameraGetExposure(cameraIndex,&exposure));
-		else exposure=0;
+		int intExposure;
+		if(API_OK==CameraGetExposure(intCameraIndex,&intExposure));
+		else intExposure=0;
 
-		xmlWriter.writeTextElement("Exposure",ui.exprosureCheckBox->isChecked()?QString::number(exposure):QString
-			::number(ui.exposureHS->value()));
+		xmlWriter.writeTextElement("Exposure",ui.checkBoxExposure->isChecked()?QString::number(intExposure):QString
+			::number(ui.horizontalSliderContrast->value()));
 
 		xmlWriter.writeEndElement();
 		xmlWriter.writeEndDocument();
@@ -137,147 +185,219 @@ void Camera::on_saveCameraParasPushButton_clicked()
 
 		QMessageBox msgbox;
 		msgbox.setWindowTitle(QStringLiteral("保存提示"));
-		msgbox.setText(fileName+QStringLiteral("已保存"));
+		msgbox.setText(qstrFileName+QStringLiteral("已保存"));
 		msgbox.exec();
 	}
 }
 
 
-/***********************************************************************
-@函数名：on_saveSingleImagePushButton_clicked
-@参数：无
-@返回值：无
-@功能：保存单张图片
-@修改信息：
-***********************************************************************/
-void Camera::on_saveSingleImagePushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonSaveCameraConfiguration_clicked
+  Description: 保存单张图片的命令
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: tracksys.cpp处理
+******************************************************************************/
+void Camera::on_pushButtonSaveSingleImage_clicked()
 {
 	emit saveSingleImage_triggered();
 }
 
-/***********************************************************************
-@函数名：on_saveMultiImagesPushButton_clicked
-@参数：无
-@返回值：无
-@功能：保存多张图片
-@修改信息：
-***********************************************************************/
-void Camera::on_saveMultiImagesPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonSaveMultipleImages_clicked
+  Description: 保存连续的图像序列
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: tracksys.cpp处理
+******************************************************************************/
+void Camera::on_pushButtonSaveMultipleImages_clicked()
 {
-	emit saveMultiImages_triggered();
+	emit stopSavingMultipleImages_triggered();
 }
 
-/***********************************************************************
-@函数名：on_stopSavingPicturesPushButton_clicked
-@参数：无
-@返回值：无
-@功能：停止保存多张图片
-@修改信息：
-***********************************************************************/
-void Camera::on_stopSavingImagesPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonStopSavingMultipleImages_clicked
+  Description: 终止保存连续的图像序列
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: tracksys.cpp处理
+******************************************************************************/
+void Camera::on_pushButtonStopSavingMultipleImages_clicked()
 {
-	emit stopSavingImages_triggered();
+	emit stopSavingMultipleImages_triggered();
 }
 
-/***********************************************************************
-@函数名：_initializeParamters
-@参数：无
-@返回值：无
-@功能：设置各项默认参数
-@修改信息：
-***********************************************************************/
-void Camera::initializeParamters()
+/******************************************************************************
+  Function:initializeCameraConfiguration
+  Description: 初始化相机配置
+  Calls: JHCap.h/CameraGetGamma JHCap.h/CameraGetContrast JHCap.h/CameraGetAGC 
+         JHCap.h/CameraGetAEC JHCap.h/CameraGetGain
+  Called By: Camera()
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::initializeCameraConfiguration()
 {
-	/***设置各种Sliders的范围***/
-	ui.contrastHS->setMaximum(200);
-	ui.contrastHS->setMinimum(30);
-	ui.exposureHS->setMaximum(2000);
-	ui.exposureHS->setMinimum(1);
-	ui.hsGain->setMaximum(64);
-	ui.hsGain->setMinimum(8);
-	ui.gammaHS->setMaximum(200);
-	ui.gammaHS->setMinimum(30);
+	ui.horizontalSliderGamma->setMaximum(200);
+	ui.horizontalSliderGamma->setMinimum(30);
+	ui.horizontalSliderContrast->setMaximum(2000);
+	ui.horizontalSliderContrast->setMinimum(1);
+	ui.horizontalSliderGain->setMaximum(64);
+	ui.horizontalSliderGain->setMinimum(8);
+	ui.horizontalSliderGamma->setMaximum(200);
+	ui.horizontalSliderGamma->setMinimum(30);
 
-	double gamma;
-	CameraGetGamma(cameraIndex,&gamma);//获取相机gamma值
-	ui.gammaLabel->setText(QString("%1").arg(gamma));
-	ui.gammaHS->setValue(gamma*100);
+	double dGamma;
+	CameraGetGamma(intCameraIndex,&dGamma);
+	ui.labelGamma->setText(QString("%1").arg(dGamma));
+	ui.horizontalSliderGamma->setValue(dGamma*100);
 
-	double contrast;
-	CameraGetContrast(cameraIndex,&contrast);
-	ui.contrastLabel->setText(QString("%1").arg(contrast));
-	ui.contrastHS->setValue(contrast*100);
+	double dContrast;
+	CameraGetContrast(intCameraIndex,&dContrast);
+	ui.labelContrast->setText(QString("%1").arg(dContrast));
+	ui.horizontalSliderGamma->setValue(dContrast*100);
 
-	bool aec,agc;
-	CameraGetAGC(cameraIndex,&agc);//获取自动增益状态
-	CameraGetAEC(cameraIndex,&aec);//获取自动曝光状态
+	bool bAEC,bAGC;
+	CameraGetAGC(intCameraIndex,&bAGC);
+	CameraGetAEC(intCameraIndex,&bAEC);
 
-	if(agc)
+	if(bAGC) // bAGC==true
 	{
-		ui.hsGain->setEnabled(false);
-		ui.gainCheckBox->setChecked(true);
+		ui.horizontalSliderGain->setEnabled(false);
+		ui.checkBoxGain->setChecked(true);
 	}
-	else
+	else //bAGC==true
 	{
 		int gain;
-		CameraGetGain(cameraIndex,&gain);
-		ui.gainLabel->setText(QString("%1").arg(gain));
-		ui.hsGain->setValue(gain);
-		ui.hsGain->setEnabled(true);
+		CameraGetGain(intCameraIndex,&gain);
+		ui.labelGamma->setText(QString("%1").arg(gain));
+		ui.horizontalSliderGain->setValue(gain);
+		ui.horizontalSliderGain->setEnabled(true);
 	}
 
-	if(aec)
+	if(bAEC) //bAEC==true
 	{
-		ui.exposureHS->setEnabled(false);
-		ui.exprosureCheckBox->setChecked(true);
+		ui.horizontalSliderContrast->setEnabled(false);
+		ui.checkBoxExposure->setChecked(true);
 	}
-	else
+	else //bAEC==false
 	{
 		int exposure;
-		CameraGetExposure(cameraIndex,&exposure);
-		ui.exposureLabel->setText(QString("%1").arg(exposure));
-		ui.exposureHS->setValue(exposure);
-		ui.exposureHS->setEnabled(true);
-		ui.exprosureCheckBox->setChecked(false);
+		CameraGetExposure(intCameraIndex,&exposure);
+		ui.labelExposure->setText(QString("%1").arg(exposure));
+		ui.horizontalSliderContrast->setValue(exposure);
+		ui.horizontalSliderContrast->setEnabled(true);
+		ui.checkBoxExposure->setChecked(false);
 	}
 }
 
-void Camera::on_gammaHS_valueChanged(int value)
+/******************************************************************************
+  Function:on_horizontalSliderGamma_valueChanged
+  Description: 设置相机gamma值
+  Calls: JHCap.h/CameraSetGamma
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_horizontalSliderGamma_valueChanged(int intGamma)
 {
-	double gamma=value/100.0;
-	CameraSetGamma(cameraIndex,gamma);
+	double dGamma=intGamma/100.0;
+	CameraSetGamma(intCameraIndex,dGamma);
 
-	ui.space1->setText(QString("%1").arg(value));
+	ui.space1->setText(QString("%1").arg(intGamma));
 }
 
-void Camera::on_contrastHS_valueChanged(int value)
+/******************************************************************************
+  Function:on_horizontalSliderContrast_valueChanged
+  Description: 设置相机contrast值
+  Calls: JHCap.h/CameraSetContrast
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_horizontalSliderContrast_valueChanged(int intContrastValue)
 {
-	double contrast=value/100.0;
-	CameraSetContrast(cameraIndex,contrast);
+	double dContrast=intContrastValue/100.0;
+	CameraSetContrast(intCameraIndex,dContrast);
 
-	ui.space2->setText(QString("%1").arg(value));
+	ui.space2->setText(QString("%1").arg(intContrastValue));
 }
 
-void Camera::on_hsGain_valueChanged(int value)
+/******************************************************************************
+  Function:on_horizontalSliderGain_valueChanged
+  Description: 设置相机gain值
+  Calls: JHCap.h/CameraSetGain
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_horizontalSliderGain_valueChanged(int intGainValue)
 {
-	CameraSetGain(cameraIndex,value);
-	ui.space3->setText(QString("%1").arg(value));
+	CameraSetGain(intCameraIndex,intGainValue);
+	ui.space3->setText(QString("%1").arg(intGainValue));
 }
 
-void Camera::on_exposureHS_valueChanged(int value)
+/******************************************************************************
+  Function:on_exposureHS_valueChanged
+  Description: 设置相机曝光值
+  Calls: JHCap.h/CameraSetExposure
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_horizontalSliderExposure_valueChanged(int intExposureValue)
 {
-	CameraSetExposure(cameraIndex,value);
-	ui.space4->setText(QString("%1").arg(value));
+	CameraSetExposure(intCameraIndex,intExposureValue);
+	ui.space4->setText(QString("%1").arg(intExposureValue));
 }
 
-void Camera::on_gainCheckBox_toggled(bool checked)
+/******************************************************************************
+  Function:on_checkBoxGain_toggled
+  Description: 设置相机曝光值
+  Calls: initializeCameraConfiguration
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_checkBoxGain_toggled(bool checked)
 {
-	CameraSetAGC(cameraIndex,checked);
-	initializeParamters();
+	CameraSetAGC(intCameraIndex,checked);
+	initializeCameraConfiguration();
 }
 
-void Camera::on_exprosureCheckBox_toggled(bool checked)
+/******************************************************************************
+  Function:on_checkBoxExposure_toggled
+  Description: 设置相机曝光值
+  Calls: initializeCameraConfiguration
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Camera::on_checkBoxExposure_toggled(bool checked)
 {
-	CameraSetAEC(cameraIndex,checked);
-	initializeParamters();
+	CameraSetAEC(intCameraIndex,checked);
+	initializeCameraConfiguration();
 }

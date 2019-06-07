@@ -1,11 +1,55 @@
+/******************************************************************************
+  File name: offlinetrack.cpp
+  Author: WillLi99		Date:2019-5-22
+  Description:
+              实现了OfflineTrack类，此类继承于QWidget，负责离线焊接模式的所有内容
+  Others: 
+  Function List:
+               OfflineTrack
+			   ~OfflineTrack
+			   start200msTiming		//200ms定时
+			   stop200msTiming		//200ms定时终止
+			   start100msTimming	//100ms定时
+			   stop100msTiming		//100ms定时终止
+			   start150msTiming		//150ms定时
+			   stop150msTiming		//150ms定时
+			   switchOnWeld			//开启焊接
+			   switchOffWeld		//关闭焊接
+
+			   synchoriWeldParameters				//同步焊接参数
+			   syncHorizontalCalibrationRatio		//同步水平标定比率
+			   on_pushButtonCollectData_clicked		//采集数据
+			   on_pushButtonAnalyzeData_clicked		//数据处理
+			   on_pushButtonRecoverSensorPosition_clicked	//复位传感器位置
+			   on_pushButtonSaveData_clicked		//储存数据
+			   on_pushButtonClearData_clicked		//清除数据
+			   on_pushButtonLoadData_clicked		//加载数据
+			   on_pushButtonStart_clicked			//启动
+			   on_pushButtonStop_clicked			//停止
+			   timeOut200ms							//定时结束的一些处理
+  History: 
+          <author>		<time>       <desc>
+           WillLi99    2019-5-20     添加offlinetrack.cpp头部注释
+******************************************************************************/
+
 #include "offlinetrack.h"
 
+/******************************************************************************
+  Function:OfflineTrack
+  Description:初始化变量
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 OfflineTrack::OfflineTrack(QWidget *parent)
 {
 	ui.setupUi(this);
-	hasSwitchedOnWeld=false;
-	hasCollected=false;
-	hasAnalyzed=false;
+	isWeldCmdTriggered=false;
+	isDataCollectionFinished=false;
+	isDataAnalysisFinished=false;
 	haveDataOrNot=false;
 	hasTrackStarted=false;
 	notAllowTrack=false;
@@ -15,34 +59,198 @@ OfflineTrack::OfflineTrack(QWidget *parent)
 	dataNum=250;
 	filePath="..\\images\\offlinetrack\\";
 	fileName="";
-	k=0;
-	t=0;
+	trackTime=0;
 	ro=0.0;
 	lnro=0.0;
 	connect(&sTimer200ms, SIGNAL(timeout()), this, SLOT(timeOut200ms()));
 
 }
 
+/******************************************************************************
+  Function:~OfflineTrack
+  Description:
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 OfflineTrack::~OfflineTrack()
 {
 
 }
 
-
-void OfflineTrack::updateWeldParameters(WeldParameter parameters)
+/******************************************************************************
+  Function:start200msTiming
+  Description:200ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::start200msTiming()
 {
-	weldSpeed=parameters.weldSpeed;
-	trackingDistance=parameters.trackingDistance;
+	sTimer200ms.start(200);
+	motionOffline.yMove(weldSpeed,weldSpeed*0.2,0.01,0);
 }
 
-void OfflineTrack::on_collectDataPushButton_clicked()
+
+/******************************************************************************
+  Function:stop200msTiming
+  Description:终止200ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::stop200msTiming()
+{
+	sTimer200ms.stop();
+}
+
+/******************************************************************************
+  Function:start100msTiming
+  Description:100ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::start100msTiming()
+{
+}
+
+
+/******************************************************************************
+  Function:stop100msTiming
+  Description:终止100ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::stop100msTiming()
+{
+}
+
+/******************************************************************************
+  Function:start150msTiming
+  Description:150ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::start150msTiming()
+{
+}
+
+
+/******************************************************************************
+  Function:stop150msTiming
+  Description:终止150ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::stop150msTiming()
+{
+}
+
+/******************************************************************************
+  Function:switchOnWeld
+  Description: 开启焊接
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::switchOnWeld()
+{
+	d1000_out_bit(4,0);
+}
+
+/******************************************************************************
+  Function:switchOffWeld
+  Description: 关闭焊接
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::switchOffWeld()
+{
+	d1000_out_bit(4,1);
+}
+
+/******************************************************************************
+  Function:syncWeldParameters
+  Description: 同步焊接参数
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::syncWeldParameters(WeldParameter parameters)
+{
+	weldSpeed=parameters.dWeldSpeed;
+	dWeldDistance=parameters.dWeldDistance;
+}
+
+/******************************************************************************
+  Function:syncHorizontalCalibrationRatio
+  Description: 同步水平标定比率
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::syncHorizontalCalibrationRatio(double horizontalCalibrationRatio)
+{
+	this->horizontalCalibrationRatio=horizontalCalibrationRatio;
+}
+
+
+/******************************************************************************
+  Function:on_pushButtonCollectData_clicked
+  Description: 采集焊缝结构光条纹图像
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonCollectData_clicked()
 {
 
-	t=trackingDistance/weldSpeed;
-	k=t/0.2;
-	dataNum=k;
+	trackTime=dWeldDistance/weldSpeed;
+	cycleCount=trackTime/0.2;
+	dataNum=cycleCount;
 
-	if(!cameraIsRunning)
+	if(!g_isCameraWorking)
 	{
 		QMessageBox msgbox;
 		msgbox.setText(QStringLiteral("请确保已打开相机！"));
@@ -53,97 +261,21 @@ void OfflineTrack::on_collectDataPushButton_clicked()
 	start200msTiming();
 }
 
-void OfflineTrack::timeOut200ms()
+/******************************************************************************
+  Function:on_pushButtonAnalyzeData_clicked
+  Description: 处理焊缝结构光条纹图像
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonAnalyzeData_clicked()
 {
-	stop200msTiming();
-	if(!notAllowTrack)
+	if(ui.radioButtonFromSensor->isChecked())	//从数据收集处采集
 	{
-		if(!hasTrackStarted)
-		{
-			fileName=filePath+QString::number(dataCount)+".bmp";
-			emit saveImage_triggered(fileName);
-			dataCount++;
-			if(dataCount<dataNum)
-			{
-				start200msTiming();
-			}
-			else
-			{
-				hasCollected=true;
-				QMessageBox msgbox;
-				msgbox.setText(QStringLiteral("数据采集完毕！"));
-				msgbox.exec();
-				return;
-			}
-		}
-		else if(hasTrackStarted)
-		{
-			if(trackCount<dataNum)
-			{
-				ro=relOffsetList[trackCount];
-				ro=ro+lnro;
-				if(abs(ro)<0.2)
-				{
-					lnro=ro;
-				}
-				else
-				{
-					offlineMotionObject.xMove(abs(6*ro),ro,0.01,1);
-					lnro=0.0;
-				}
-				
-				trackCount++;
-				start200msTiming();
-			}
-		else
-			{
-				switchOffWeld();
-				QMessageBox msgbox;
-				msgbox.setText(QStringLiteral("跟踪完成！"));
-				msgbox.exec();
-				return;
-			}
-		}
-	}
-	else if(notAllowTrack)	//停止时清除数据
-	{
-		dataCount=0;
-		trackCount=0;
-		absOffsetList.clear();
-		relOffsetList.clear();
-		
-		offlineMotionObject.allStop();
-
-
-		switchOffWeld();
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("已停机，并清除数据！"));
-		msgbox.exec();
-		return;
-	}
-}
-
-void OfflineTrack::start200msTiming()
-{
-	//qDebug()<<"200ms timing starts...";
-	sTimer200ms.start(200);
-	offlineMotionObject.yMove(weldSpeed,weldSpeed*0.2,0.01,0);
-}
-
-
-
-void OfflineTrack::stop200msTiming()
-{
-	sTimer200ms.stop();
-	//qDebug()<<"200ms timing terminates...";
-}
-
-
-void OfflineTrack::on_analyzePushButton_clicked()
-{
-	if(ui.fromCollectionRadioButton->isChecked())	//从数据收集处采集
-	{
-		if(!hasCollected)
+		if(!isDataCollectionFinished)
 		{
 			QMessageBox msgbox;
 			msgbox.setText(QStringLiteral("请确保数据采集完成！"));
@@ -151,7 +283,7 @@ void OfflineTrack::on_analyzePushButton_clicked()
 			return;
 		}
 	}
-	else if(ui.fromFolderRadioButton->isChecked())
+	else if(ui.radioButtonFromSensor->isChecked())
 	{
 		dataNum=250;
 	}
@@ -171,13 +303,14 @@ void OfflineTrack::on_analyzePushButton_clicked()
 
 		}
 		DIP dip(image);
-		double offset=dip.seaminfo.weldSeamOffset;
-		absOffsetList.push_back(dip.seaminfo.weldSeamOffset);
+		double offset=dip.seaminfo.dWeldSeamOffset;
+		absOffsetList.push_back(dip.seaminfo.dWeldSeamOffset);
 	}
 
 	qDebug()<<"the last abs offset is"<<absOffsetList[dataNum-1];
 	qDebug()<<"the first abs offset is"<<absOffsetList[0];
-	qDebug()<<"the difference of the last and the first is:"<<rho*(absOffsetList[dataNum-1]-absOffsetList[0]);
+	qDebug()<<"the difference of the last and the first is:"<<horizontalCalibrationRatio*
+		(absOffsetList[dataNum-1]-absOffsetList[0]);
 
 	double lastAbsOffset;
 	double sum=0.0;
@@ -189,7 +322,7 @@ void OfflineTrack::on_analyzePushButton_clicked()
 			relOffsetList.push_back(0.0);
 			continue;
 		}
-		double reloffset=rho*(absOffsetList[i]-lastAbsOffset);
+		double reloffset=horizontalCalibrationRatio*(absOffsetList[i]-lastAbsOffset);
 		relOffsetList.push_back(reloffset);
 		lastAbsOffset=absOffsetList[i];
 		sum=sum+reloffset;
@@ -198,8 +331,8 @@ void OfflineTrack::on_analyzePushButton_clicked()
 	qDebug()<<"the sum of all the rel offset is:"<<sum;
 
 	
-	hasAnalyzed=true;
-	if(hasAnalyzed)
+	isDataAnalysisFinished=true;
+	if(isDataAnalysisFinished)
 	{
 		haveDataOrNot=true;
 		QMessageBox msgbox;
@@ -209,7 +342,17 @@ void OfflineTrack::on_analyzePushButton_clicked()
 	}
 }
 
-void OfflineTrack::on_returnOriginPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonRecoverSensorPosition_clicked
+  Description: 恢复焊枪的位置
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonRecoverSensorPosition_clicked()
 {
 	if(!haveDataOrNot)
 	{
@@ -218,10 +361,20 @@ void OfflineTrack::on_returnOriginPushButton_clicked()
 		msgbox.exec();
 		return;
 	}
-	offlineMotionObject.yMove(3*weldSpeed,-trackingDistance,0.2,1);
+	motionOffline.yMove(3*weldSpeed,-dWeldDistance,0.2,1);
 }
 
-void OfflineTrack::on_startPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonStart_clicked
+  Description: 启动离线跟踪
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonStart_clicked()
 {
 	if(!haveDataOrNot)
 	{
@@ -232,7 +385,7 @@ void OfflineTrack::on_startPushButton_clicked()
 	}
 	hasTrackStarted=true;
 
-	if(ui.onRadioButton->isChecked())
+	if(ui.radioButtonOn->isChecked())
 	{
 		switchOnWeld();
 	}
@@ -240,16 +393,19 @@ void OfflineTrack::on_startPushButton_clicked()
 	start200msTiming();
 }
 
-
-void OfflineTrack::updateHorizontalRatio(double rho)
+/******************************************************************************
+  Function:on_pushButtonClearData_clicked
+  Description: 清除数据
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonClearData_clicked()
 {
-	this->rho=rho;
-}
-
-
-void OfflineTrack::on_clearDataPushButton_clicked()
-{
-	if(ui.memoryOnlyRadioButton->isChecked())	//仅清理内存
+	if(ui.radioButtonOnlyMemory->isChecked())	//仅清理内存
 	{
 		dataCount=0;
 		trackCount=0;
@@ -262,7 +418,7 @@ void OfflineTrack::on_clearDataPushButton_clicked()
 		msgbox.exec();
 		return;
 	}
-	else if(ui.allRadioButton->isChecked())		//清理内存和文件夹资料
+	else if(ui.radioButtonTotally->isChecked())		//清理内存和文件夹资料
 	{
 		dataCount=0;
 		trackCount=0;
@@ -288,20 +444,38 @@ void OfflineTrack::on_clearDataPushButton_clicked()
 	
 }
 
-
-void OfflineTrack::on_stopPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonStop_clicked
+  Description: 停止离线跟踪
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonStop_clicked()
 {
 	notAllowTrack=true;
-	offlineMotionObject.allStop();
+	motionOffline.allStop();
 	
 	switchOffWeld();
-	ui.onRadioButton->setChecked(true);
+	ui.radioButtonOn->setChecked(true);
 }
 
-
-void OfflineTrack::on_saveDataPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonSaveData_clicked
+  Description: 保存数据
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonSaveData_clicked()
 {
-	dataCount=dataNum;weldSpeed=2.0;trackingDistance=100.0;
+	dataCount=dataNum;weldSpeed=2.0;dWeldDistance=100.0;
 
 	if(relOffsetList.length()==0)
 	{
@@ -326,7 +500,7 @@ void OfflineTrack::on_saveDataPushButton_clicked()
 				
 				QString vitalInfo;
 				vitalInfo=QString::number(dataCount)+" "+QString::number(weldSpeed)+" "+
-					QString::number(trackingDistance);
+					QString::number(dWeldDistance);
 				txtStream<<vitalInfo<<endl;
 
 				QString offsetString;
@@ -347,7 +521,17 @@ void OfflineTrack::on_saveDataPushButton_clicked()
 	}
 }
 
-void OfflineTrack::on_loadDataPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonLoadData_clicked
+  Description: 加载数据
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::on_pushButtonLoadData_clicked()
 {
 	QString fileName=QFileDialog::getOpenFileName(this,"open txt","..\\data",
 		"txt file(*.txt)");
@@ -375,7 +559,7 @@ void OfflineTrack::on_loadDataPushButton_clicked()
 
 		dataNum=strList[0].toInt();
 		weldSpeed=strList[1].toDouble();
-		trackingDistance=strList[2].toDouble();
+		dWeldDistance=strList[2].toDouble();
 		
 		int i=0;
 		QString lineStr;
@@ -401,11 +585,82 @@ void OfflineTrack::on_loadDataPushButton_clicked()
 	}
 }
 
-void OfflineTrack::switchOnWeld()
+/******************************************************************************
+  Function:timeOut200ms
+  Description: 200ms定时结束后的动作
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OfflineTrack::timeOut200ms()
 {
-	d1000_out_bit(4,0);
-}
-void OfflineTrack::switchOffWeld()
-{
-	d1000_out_bit(4,1);
+	stop200msTiming();
+	if(!notAllowTrack)
+	{
+		if(!hasTrackStarted)
+		{
+			fileName=filePath+QString::number(dataCount)+".bmp";
+			emit saveImage_triggered(fileName);
+			dataCount++;
+			if(dataCount<dataNum)
+			{
+				start200msTiming();
+			}
+			else
+			{
+				isDataCollectionFinished=true;
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("数据采集完毕！"));
+				msgbox.exec();
+				return;
+			}
+		}
+		else if(hasTrackStarted)
+		{
+			if(trackCount<dataNum)
+			{
+				ro=relOffsetList[trackCount];
+				ro=ro+lnro;
+				if(abs(ro)<0.2)
+				{
+					lnro=ro;
+				}
+				else
+				{
+					motionOffline.xMove(abs(6*ro),ro,0.01,1);
+					lnro=0.0;
+				}
+
+				trackCount++;
+				start200msTiming();
+			} // end of if(trackCount<dataNum)
+			else
+			{
+				switchOffWeld();
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("跟踪完成！"));
+				msgbox.exec();
+				return;
+			}
+		}
+	}
+	else if(notAllowTrack)	//停止时清除数据
+	{
+		dataCount=0;
+		trackCount=0;
+		absOffsetList.clear();
+		relOffsetList.clear();
+
+		motionOffline.allStop();
+
+
+		switchOffWeld();
+		QMessageBox msgbox;
+		msgbox.setText(QStringLiteral("已停机，并清除数据！"));
+		msgbox.exec();
+		return;
+	}
 }

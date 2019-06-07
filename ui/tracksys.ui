@@ -71,7 +71,7 @@
     <property name="title">
      <string>焊接状态</string>
     </property>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget1">
      <property name="geometry">
       <rect>
        <x>282</x>
@@ -80,7 +80,7 @@
        <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout3">
+     <layout class="QVBoxLayout" name="verticalLayoutNo3">
       <item>
        <widget class="QLabel" name="weldSpeedLabel">
         <property name="text">
@@ -143,7 +143,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget2">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -152,7 +152,7 @@
        <height>171</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout2">
+     <layout class="QVBoxLayout" name="verticalLayoutNo2">
       <item>
        <widget class="QLabel" name="seamTypeLabel">
         <property name="autoFillBackground">
@@ -221,7 +221,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget3">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -230,7 +230,7 @@
        <height>91</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout1">
+     <layout class="QVBoxLayout" name="verticalLayoutNo1">
       <item>
        <widget class="QLabel" name="controlcardStateLabel">
         <property name="text">
@@ -263,7 +263,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget4">
      <property name="geometry">
       <rect>
        <x>450</x>
@@ -272,7 +272,7 @@
        <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout8">
+     <layout class="QVBoxLayout" name="verticalLayoutNo8">
       <item>
        <widget class="QLabel" name="unitLabel6">
         <property name="font">
@@ -347,7 +347,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget5">
      <property name="geometry">
       <rect>
        <x>360</x>
@@ -356,7 +356,7 @@
        <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout7">
+     <layout class="QVBoxLayout" name="verticalLayoutNo7">
       <item>
        <widget class="QLabel" name="weldSpeedDisplayLabel">
         <property name="font">
@@ -506,7 +506,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget6">
      <property name="geometry">
       <rect>
        <x>210</x>
@@ -515,7 +515,7 @@
        <height>171</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout6">
+     <layout class="QVBoxLayout" name="verticalLayoutNo6">
       <item>
        <widget class="QLabel" name="unitLabel0">
         <property name="font">
@@ -590,7 +590,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget7">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -599,7 +599,7 @@
        <height>182</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout5">
+     <layout class="QVBoxLayout" name="verticalLayoutNo5">
       <item>
        <widget class="QLabel" name="seamTypeDisplayLabel">
         <property name="font">
@@ -757,7 +757,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QWidget" name="layoutWidget8">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -766,7 +766,7 @@
        <height>91</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout4">
+     <layout class="QVBoxLayout" name="verticalLayoutNo4">
       <item>
        <widget class="QLabel" name="cardStateDisplayLabel">
         <property name="font">
@@ -1249,7 +1249,7 @@
      <x>0</x>
      <y>0</y>
      <width>1018</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">

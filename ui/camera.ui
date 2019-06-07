@@ -28,7 +28,7 @@
    <property name="title">
     <string>ISP</string>
    </property>
-   <widget class="QPushButton" name="wbPushButton">
+   <widget class="QPushButton" name="pushButtonWhiteBalance">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -52,14 +52,14 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="gammaLabel">
+      <widget class="QLabel" name="labelGamma">
        <property name="text">
         <string>Gamma</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="gammaHS">
+      <widget class="QSlider" name="horizontalSliderGamma">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -85,14 +85,14 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="contrastLabel">
+      <widget class="QLabel" name="labelContrast">
        <property name="text">
         <string>Contrast</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="contrastHS">
+      <widget class="QSlider" name="horizontalSliderContrast">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -118,7 +118,7 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QCheckBox" name="gainCheckBox">
+      <widget class="QCheckBox" name="checkBoxGain">
        <property name="text">
         <string>Auto</string>
        </property>
@@ -128,14 +128,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="gainLabel">
+      <widget class="QLabel" name="labelGain">
        <property name="text">
         <string>Gain</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="hsGain">
+      <widget class="QSlider" name="horizontalSliderGain">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -173,7 +173,7 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QCheckBox" name="exprosureCheckBox">
+      <widget class="QCheckBox" name="checkBoxExposure">
        <property name="text">
         <string>Auto</string>
        </property>
@@ -183,14 +183,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="exposureLabel">
+      <widget class="QLabel" name="labelExposure">
        <property name="text">
         <string>Exposure</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="exposureHS">
+      <widget class="QSlider" name="horizontalSliderExposure">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -230,7 +230,7 @@
    <property name="title">
     <string>Load and Save</string>
    </property>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>22</x>
@@ -243,26 +243,26 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="loadCameraParasPushButton">
+        <widget class="QPushButton" name="pushButtonLoadCameraConfiguration">
          <property name="text">
-          <string>载入相机参数</string>
+          <string>载入相机配置</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="saveCameraParasPushButton">
+        <widget class="QPushButton" name="pushButtonSaveCameraConfiguration">
          <property name="text">
-          <string>保存相机参数</string>
+          <string>保存相机配置</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="saveSingleImagePushButton">
+        <widget class="QPushButton" name="pushButtonSaveSingleImage">
          <property name="toolTip">
           <string/>
          </property>
          <property name="text">
-          <string>保存单张图片Ctrl+S</string>
+          <string>保存单张图片</string>
          </property>
          <property name="shortcut">
           <string>Ctrl+S</string>
@@ -274,12 +274,12 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QPushButton" name="saveMultiImagesPushButton">
+        <widget class="QPushButton" name="pushButtonSaveMultipleImages">
          <property name="toolTip">
           <string/>
          </property>
          <property name="text">
-          <string>保存连续的多张图像Ctrl+Shift+S</string>
+          <string>保存连续的多张图像</string>
          </property>
          <property name="shortcut">
           <string>Ctrl+Shift+S</string>
@@ -287,12 +287,12 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="stopSavingImagesPushButton">
+        <widget class="QPushButton" name="pushButtonStopSavingMultipleImages">
          <property name="toolTip">
           <string/>
          </property>
          <property name="text">
-          <string>停止Ctrl+Backspace</string>
+          <string>停止保存</string>
          </property>
          <property name="shortcut">
           <string>Ctrl+Backspace</string>

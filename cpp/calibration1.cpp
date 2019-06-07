@@ -1,43 +1,67 @@
+/******************************************************************************
+  FileName: calibration1.cpp
+  Author: WillLi		Date:2019-5-18
+  Description:
+	          SimpleCalibration类的的实现
+  Function List:
+                1. SimpleCalibration	// 类初始化
+                2. ~SimpleCalibration	// 类析构时
+                3. on_confirmPushButton_clicked // 计算rho--即水平标定比率
+                4. updateHorizontalCalibrationRatio_triggered
+  History:
+         <author>		<time>     <desc>
+          WillLi99    2019-5-18     添加clibration.cpp头部注释和各函数的头部注释  
+******************************************************************************/
+
 #include "calibration1.h"
 #include "var.h"
 
 
-/***********************************************************************
-@函数名：SimpleCalibration
-@参数：
-@返回值：
-@功能：SimpleCalibration类的初始化函数
-@修改信息：
-***********************************************************************/
+/******************************************************************************
+  Function:SimpleCalibration
+  Description: 
+  Calls: 
+  Called By: SimpleCalibration类
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 SimpleCalibration::SimpleCalibration(QWidget *parent)
 {
 	ui.setupUi(this);
 }
 
-/***********************************************************************
-@函数名：~SimpleCalibration
-@参数：
-@返回值：
-@功能：SimpleCalibration类的析构函数
-@修改信息：
-***********************************************************************/
+/******************************************************************************
+  Function:~SimpleCalibration
+  Description: 
+  Calls: 
+  Called By: SimpleCalibration类
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 SimpleCalibration::~SimpleCalibration(void)
 {
 }
 
-/***********************************************************************
-@函数名：on_confirmPushButton_clicked
-@参数：
-@返回值：
-@功能：响应对“confirmPushButton"的点击事件
-@修改信息：
-***********************************************************************/
-void SimpleCalibration::on_confirmPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonConfirm_clicked
+  Description: 
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void SimpleCalibration::on_pushButtonConfirm_clicked()
 {
 	QString aswString,pswString;
-	double asw,psw,rho;
-	aswString=ui.actualSeamWidthLineEdit->text();
-	pswString=ui.pictorialSeamWidthLineEdit->text();
+	double asw,psw;
+	aswString=ui.lineEditRealCalibrationBlockWidth->text();
+	pswString=ui.lineEditPhotographicBlockWidth->text();
 
 	//检测kString和bString是否合法
 	asw=aswString.toDouble();
@@ -61,10 +85,10 @@ void SimpleCalibration::on_confirmPushButton_clicked()
 		return;
 	}
 
-	rho=asw/psw;
-	qDebug()<<"rho from simple calibration is "<<rho;
-	emit updateHorizontalCalibrationRatio_triggered(rho);
-	hasCalibrated=true;
+	dHorizontalCalibrationRatio=asw/psw;
+	qDebug()<<"horizontalCalibrationRatio from simple calibration is "<<dHorizontalCalibrationRatio;
+	emit updateHorizontalCalibrationRatio_triggered(dHorizontalCalibrationRatio);
+	emit updateCalibrationState_triggered();;
 
 	close();
 }

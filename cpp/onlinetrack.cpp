@@ -1,46 +1,274 @@
-/*****************************************************************************
-Copyright: 
-Author: Li Yangjin
-Date: 2018-8-27
-Description:Dip_AutoTracking类封装了图像处理的功能和实时跟踪的功能。调用Dip_Auto
-			Tracking实例的processImage开启图像识别处理，完成识别后emit输出图片和
-			偏差bias. 自动纠偏功能的开机依赖于_autoTrackingSwitch的开启，由set-
-			AutoTrackingSwitch函数负责。
-*****************************************************************************/
+/******************************************************************************
+  File name: onlinetrack.cpp
+  Author: WillLi99		Date:2019-5-21
+  Description:
+              此文件实现onlinetrack类. onlinetrack类负责在线图像处理和在线跟踪。            
+  Others: 
+  Function List:
+                OnlineTrack			//基本配置
+				~OnlineTrack		//
+				start100msTiming	//开启100ms定时
+				start200msTiming	//开启200ms定时
+				timeOut200ms		//定时达到200ms后的处理
+				stopTiming			//关闭定时
+				sumUpList			//列表求和
+				allowAutoTrack		//启用自动跟踪过程
+				declineAutoTrack	//禁用自动跟踪过程
+				updateHorizontalCalibrationRatio	//接收水平标定比率
+				dip					//调用图像处理
+				
+				sendDIPResult_triggered				//发送DIP结果，结果是一幅处理图
+				sendDIPCalculationResult_triggered	//发送DIP计算结果
+				allowNextDIP_triggered				//下一帧的图像处理
+  History: 
+          <author>		<time>       <desc>
+           WillLi99    2019-5-21    添加onlinetrack.h头部注释
+******************************************************************************/
 #include "dip.h"
 #include "onlinetrack.h"
 
+/******************************************************************************
+  Function:OnlineTrack
+  Description: 初始化变量和创建信号连接
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 OnlineTrack::OnlineTrack(QObject* parent)
 {
-	dipSwitch=false;
-	_autoTrackingSwitch=false;
-	torchSensorDistance=42;
-	sensorFrameRate=5;
-	nROffsetCount=0;
-	offsetCount=0;
-	lAbsOffset=0.0;
-	tinyOffset=0.0;
+	isDIPAllowed=false;
+	isAutoTrackTriggered=false;
+	
+	dTorchSensorDistance=42;	//42mm
+	dSensorFrameRate=5;
+	intROffsetCount=0;
+	intOffsetCount=0;
+	dLastAbsOffset=0.0;
+	dTinyOffset=0.0;
 	timeoutFlag=true;
+	isTestModeTriggered=true;
 
 	//没有更新的情况下，按照以下参数运行
-	//设置bufferNum.帧率为10Hz,y轴移动速度为
-	weldVelocity=2;	//焊接速度为2mm/s
-	bufferNum=sensorFrameRate*torchSensorDistance/weldVelocity;
-	qDebug()<<"bufferNum="<<bufferNum;
+	//设置intBufferNum.帧率为10Hz,y轴移动速度为
+	dWeldSpeed=2;	//焊接速度为2mm/s
+	intBufferNum=dSensorFrameRate*dTorchSensorDistance/dWeldSpeed;
+	qDebug()<<"intBufferNum="<<intBufferNum;
 	connect(&sTimer, SIGNAL(timeout()), this, SLOT(timeOut200ms()));
-
 }
 
-
+/******************************************************************************
+  Function:~OnlineTrack
+  Description: 
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 OnlineTrack::~OnlineTrack(void)
 {
 }
 
+/******************************************************************************
+  Function:start100msTiming
+  Description: 启动100ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::start100msTiming()
+{
+	sTimer.start(100);	//启动100ms定时
+}
+
+/******************************************************************************
+  Function:start200msTiming
+  Description: 启动200ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::start200msTiming()
+{
+	sTimer.start(200);	//启动200ms定时
+}
+
+/******************************************************************************
+  Function:stopTiming
+  Description: 关闭定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::stopTiming()
+{
+	sTimer.stop();
+}
+
+/******************************************************************************
+  Function:timeOut200ms
+  Description: 启动200ms定时
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::timeOut200ms()
+{
+	timeoutFlag=true;
+	stopTiming();
+	emit enableNextDIP_triggered();
+}
+
+/******************************************************************************
+  Function:sumUpList
+  Description: 将制定的list内容相加求和
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+double OnlineTrack::sumUpList(vector<double>lst,int start,int end)
+{
+	double value=0.0;
+	for(int i=start;i<end;i++)
+	{
+		value=value+lst[i];
+	}
+	return value;
+}
+
+/******************************************************************************
+  Function:enableAutoTrack
+  Description: 使能自动跟踪
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::enableAutoTrack(SeamTrackParameter spParameter)
+{
+	isAutoTrackTriggered=true;
+	dWeldSpeed=spParameter.weldingVelocity;
+	intBufferNum=dSensorFrameRate*dTorchSensorDistance/dWeldSpeed;
+}
+
+/******************************************************************************
+  Function:disableAutoTrack
+  Description: 关闭自动跟踪
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::disableAutoTrack()
+{
+	isAutoTrackTriggered=false;
+}
+
+/******************************************************************************
+  Function:dip
+  Description: 允许执行一次图像处理
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::dip(QImage image)
+{
+	//深拷贝
+	_image=image.copy();
+	start200msTiming();		//开启一个周期200ms的定时
+	isDIPAllowed=true;
+	if(isAutoTrackTriggered)
+	{
+		motionRectification.yMove(dWeldSpeed,dWeldSpeed*0.2,0.01,0);
+	}
+}
+
+/******************************************************************************
+  Function:syncHorizontalCalibrationRatio
+  Description: 同步水平标定率
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::syncHorizontalCalibrationRatio(double hcr)
+{
+	dHorizontalCalibrationRatio=hcr;
+}
+
+/******************************************************************************
+  Function:enableTestingMode
+  Description: 允许测试模式
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::enableTestingMode()
+{
+	isTestModeTriggered=true;
+}
+
+/******************************************************************************
+  Function:disableTestingMode
+  Description: 禁止测试模式
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void OnlineTrack::disableTestingMode()
+{
+	isTestModeTriggered=false;
+}
+
+/******************************************************************************
+  Function:run
+  Description: 
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 void OnlineTrack::run()
 {
 	while(true)
 	{
-		if(dipSwitch && !testOrNot) //在线模式下，需要在图像处理完成后进行纠偏
+		if(isDIPAllowed && !isTestModeTriggered) //在线模式下，需要在图像处理完成后进行纠偏
 		{
 			Mat imgOnProcessing=DIP::qImage2Mat(_image);
 			DIP::getROIPosition(imgOnProcessing,&DIP::roiX,&DIP::roiY);
@@ -51,107 +279,45 @@ void OnlineTrack::run()
 			emit sendDIPResult_triggered(dip.out);
 			emit sendDIPCalculationResult_triggered(dip.seaminfo);
 
-			absOffset=dip.seaminfo.weldSeamOffset*_rho;
-			dipSwitch=false;
+			dAbsOffset=dip.seaminfo.dWeldSeamOffset*dHorizontalCalibrationRatio;
+			isDIPAllowed=false;
 
 			/***********进行在线跟踪***************/
-			if(AutoTrackingTriggledFlag)
+			if(isAutoTrackTriggered)
 			{
-				absOffsetList.push_back(absOffset);	//添加绝对偏差
-				qDebug()<<"adding "<<offsetCount<<"th absolute offset:"<<absOffset;
+				absOffsetList.push_back(dAbsOffset);	//添加绝对偏差
+				qDebug()<<"adding "<<intOffsetCount<<"th absolute offset:"<<dAbsOffset;
 				
-				if(offsetCount<bufferNum)
+				if(intOffsetCount<intBufferNum)
 				{
-					nROffset=absOffset-lAbsOffset;
-					rOffsetList.push_back(nROffset);
-					qDebug()<<"adding "<<offsetCount<<"th"<<"rectifying offseta;"<<nROffset;
-					lAbsOffset=absOffset;
-					offsetCount++;
+					dNthROffset=dAbsOffset-dLastAbsOffset;
+					rOffsetList.push_back(dNthROffset);
+					qDebug()<<"adding "<<intOffsetCount<<"th"<<"rectifying offseta;"<<dNthROffset;
+					dLastAbsOffset=dAbsOffset;
+					intOffsetCount++;
 				}
-				else if(offsetCount>=bufferNum)//开始纠偏
+				else if(intOffsetCount>=intBufferNum)//开始纠偏
 				{
-					nROffset=absOffset-sumUpList(rOffsetList,nROffsetCount+1,offsetCount);
-					rOffsetList.push_back(nROffset);
-					qDebug()<<"adding "<<offsetCount<<"th rectifying offset:"<<nROffset;
+					dNthROffset=dAbsOffset-sumUpList(rOffsetList,intROffsetCount+1,intOffsetCount);
+					rOffsetList.push_back(dNthROffset);
+					qDebug()<<"adding "<<intOffsetCount<<"th rectifying offset:"<<dNthROffset;
 					
-					cROffset=rOffsetList[nROffsetCount]+tinyOffset;					
-					if(abs(cROffset)>0.2 && abs(cROffset)<3.0)
+					dCROffset=rOffsetList[intROffsetCount]+dTinyOffset;					
+					if(abs(dCROffset)>0.2 && abs(dCROffset)<3.0)
 					{
-						_rectificationObject.xMove(5*cROffset,cROffset,0.01,0);
-						qDebug()<<"correcting "<<nROffsetCount<<"th. "<<cROffset;
-						tinyOffset=0.0;
+						motionRectification.xMove(5*dCROffset,dCROffset,0.01,0);
+						qDebug()<<"correcting "<<intROffsetCount<<"th. "<<dCROffset;
+						dTinyOffset=0.0;
 					}
-					else if(abs(cROffset)<=0.2)
+					else if(abs(dCROffset)<=0.2)
 					{
-						tinyOffset=tinyOffset+cROffset;
+						dTinyOffset=dTinyOffset+dCROffset;
 					}
-					nROffsetCount++;
-					offsetCount++;
+					intROffsetCount++;
+					intOffsetCount++;
 				}
-			}
+			} // end of if(isAutoTrackTriggered)
 
-		}
-	}
-}
-
-void OnlineTrack::dip(QImage image)
-{
-	//深拷贝
-	_image=image.copy();
-	start200msTiming();		//开启一个周期200ms的定时
-	dipSwitch=true;
-	if(AutoTrackingTriggledFlag)
-	{
-		_rectificationObject.yMove(weldVelocity,weldVelocity*0.2,0.01,0);
-	}
-}
-
-void OnlineTrack::setAutoTrackingSwitch(SeamTrackParameter seamTrackingParas)
-{
-	_autoTrackingSwitch=true;
-	weldVelocity=seamTrackingParas.weldingVelocity;
-	bufferNum=sensorFrameRate*torchSensorDistance/weldVelocity;
-}
-
-
-void OnlineTrack::updateHorizontalCalibrationRatio(double rho)
-{
-	_rho=rho;
-}
-
-void OnlineTrack::timeOut200ms()
-{
-	timeoutFlag=true;
-	stopTiming();
-	emit allowNextDIP_triggered();
-}
-
-void OnlineTrack::start100msTiming()
-{
-	sTimer.start(100);	//启动100ms定时
-}
-
-void OnlineTrack::start200msTiming()
-{
-	sTimer.start(200);	//启动100ms定时
-}
-
-void OnlineTrack::stopTiming()
-{
-	sTimer.stop();
-}
-
-void OnlineTrack::stopAutoTracking()
-{
-	_autoTrackingSwitch=false;
-}
-
-double OnlineTrack::sumUpList(vector<double>lst,int start,int end)
-{
-	double value=0.0;
-	for(int i=start;i<end;i++)
-	{
-		value=value+lst[i];
-	}
-	return value;
+		} //end of if(isDIPAllowed && !testOrNot)
+	}// end of while(true)
 }

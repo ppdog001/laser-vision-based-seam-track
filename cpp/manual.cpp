@@ -1,55 +1,136 @@
-/*****************************************************************************
-Copyright: 
-Author: Li Yangjin
-Date: 2018-8-21
-Description:Motion类用来进行对平台进行手动控制，平台的坐标系如下图所示
-                      ^z+
-                      |
-                      |-----> y+
-                     /
-                    /
-                   <x+
-
-*****************************************************************************/
+/******************************************************************************
+  File name: manual.cpp
+  Author: WillLi99		Date:2019-5-20
+  Description:
+              定义了Manual类，此类继承于QWidget，负责运动平台的手动控制
+  Others: 
+  Function List:
+                  Manual
+                  ~Manual
+                  initializeConfiguration		//初始化运动配置
+                  fillDefaultConfiguration	//填充默认的运动配置
+                  updateConfiguration			//更新运动配置
+                  switchOnWeld				//开焊接
+                  switchOffWeld				//关焊接
+                  on_pushButtonSwitchOnWeld_clicked
+                  on_pushButtonSwitchOffWeld_clicked
+                  on_radioButtonContinousMotion_toggled	//切换到连续运动模式
+                  on_radioButtonFixedMotion_toggled		//切换到固定运动模式
+                  on_pushButtonStart_clicked				//启动
+                  on_pushButtonStop_clicked				//制动
+                  on_pushButtonRecoverWeldTorch_clicked	//焊枪返回原来位置
+  History: 
+          <author>		<time>       <desc>
+           WillLi99    2019-5-20     添加manual.h头部注释
+		   WillLi99	   2019-6-6      修改了部分变量的命名
+******************************************************************************/
 
 #include "motion.h"
 #include "manual.h"
 #include "dmc1000.h"
 
+/******************************************************************************
+  Function:Manual
+  Description:初始化配置
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 Manual::Manual(QWidget *parent)
 {
 	ui.setupUi(this);
-	manualMotionObject=new Motion;
+	motionManual=new Motion;
 
-	checkPass=0;
-	initializeParameters();		//初始化设置manuanlControl ui相关内容
-	fillDefaultParamters();		//填充
-	manualMotionObject->start();
+	isCheckQualified=false;
+	initializeConfiguration();		//初始化设置manuanlControl ui相关内容
+	fillDefaultConfiguration();		//填充
+	motionManual->start();
 	d1000_out_bit(4,1);		//初始化设置为高电平,断开继电器
 }
 
+/******************************************************************************
+  Function:~Manual
+  Description:析构函数
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 Manual::~Manual()
 {
 	
 }
 
-/*****************************************************************************
-Function:void Manual::on_startPushButton_clicked()
-Description:响应手动控制界面对“开始”按钮的点击事件
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::on_startPushButton_clicked()
+/******************************************************************************
+  Function:initializeConfiguration
+  Description: 设置运动参数的初始值。
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::initializeConfiguration()
 {
-	updateParameters();			//更新数据，载入各种LineEdit的内容
+
+	intAxleMode1=3;
+	intRotationDirectionMode1=1;
+	intMotionMethodMode1=2;
+	intAccelerationMethodMode1=2;
+	dMoveDistanceMode1=10.0;
+	dMaxSpeedMode1=5.0;		
+	dAccelerationTimeMode1=0.2;
+
+	dXMoveDistanceMode2=0.0;
+	dXMaxSpeedMode2=5.0;
+	dXAccelerationTimeMode2=0.1;
+	intXAccelerationMethodMode2=0.0;
+
+	dYMoveDistanceMode2=0.0;
+	dYMaxSpeedMode2=5.0;
+	dYAccelerationTimeMode2=0.1;
+	intYAccelerationMethodMode2=0;
+
+	dZMoveDistanceMode2=0.0;
+	dZMaxSpeedMode2=5.0;
+	dZAccelerationTimeMode2=0.1;
+	intZAccelerationMethodMode2=0;
+	
+	dWeldVoltage=25.0;
+	dWeldCurrent=100.0;
+	dWireRate=2.0;
+	dGasFlow=0.5;
+	intWeldStartCondition=1;	
+
+	intControlMode=1;
+
+	isWeldSwitchedOn=false;
+}
 
 
-	//分单轴模式还是多轴模式作不同处理
-	if(controlMode==0)
+/******************************************************************************
+  Function:on_pushButtonStart_clicked
+  Description:开启运动
+  Calls: checkConfiguration
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::on_pushButtonStart_clicked()
+{
+	checkConfiguration();
+
+	if(intControlMode==1)
 	{
-		if(!checkPass)
+		if(!isCheckQualified)
 		{
 			QMessageBox msgBox;
 			msgBox.setText(QStringLiteral("参数设置出错，未能开始运动"));
@@ -58,37 +139,41 @@ void Manual::on_startPushButton_clicked()
 		}
 
 		//连续运动
-		if (ui.cntnsModeRadioButton->isChecked())
+		if(ui.radioButtonContinousMotion->isChecked())
 		{
-			if (rotationDirectionA == 1)	maxSpeedA = abs(maxSpeedA);
-			else if (rotationDirectionA == 2)	maxSpeedA = -abs(maxSpeedA);
+			if (intRotationDirectionMode1 == 1)	
+				dMaxSpeedMode1 = abs(dMaxSpeedMode1);
+			else if (intRotationDirectionMode1 == 2)	
+				dMaxSpeedMode1 = -abs(dMaxSpeedMode1);
 
-			switch (axisA)
+			switch (intAxleMode1)
 			{
-			case 0:manualMotionObject->xRun(maxSpeedA,accTimeA,accelerationModeA);break;
-			case 2:manualMotionObject->zRun(maxSpeedA,accTimeA,accelerationModeA);break;
-			case 3:manualMotionObject->yRun(maxSpeedA,accTimeA,accelerationModeA);break;
+			case 0:motionManual->xRun(dMaxSpeedMode1,dAccelerationTimeMode1,intAccelerationMethodMode1);break;
+			case 2:motionManual->zRun(dMaxSpeedMode1,dAccelerationTimeMode1,intAccelerationMethodMode1);break;
+			case 3:motionManual->yRun(dMaxSpeedMode1,dAccelerationTimeMode1,intAccelerationMethodMode1);break;
 			}
 		}
 
 		//定长运动
-		if (ui.fixedModeRadioButton->isChecked())
+		if (ui.radioButtonFixedMotion->isChecked())
 		{
 			//旋向
-			if (rotationDirectionA == 1)	moveDistanceA = abs(moveDistanceA);//正向
-			else if (rotationDirectionA == 2)	moveDistanceA = -abs(moveDistanceA);//负向
+			if (intRotationDirectionMode1 == 1)	
+				dMoveDistanceMode1 = abs(dMoveDistanceMode1);
+			else if (intRotationDirectionMode1 == 2)	
+				dMoveDistanceMode1 = -abs(dMoveDistanceMode1);
 
-			switch (axisA)
+			switch (intAxleMode1)
 			{
-			case 0:manualMotionObject->xMove(maxSpeedA,moveDistanceA,accTimeA,accelerationModeA);break;
-			case 2:manualMotionObject->zMove(maxSpeedA,moveDistanceA,accTimeA,accelerationModeA);break;
-			case 3:manualMotionObject->yMove(maxSpeedA,moveDistanceA,accTimeA,accelerationModeA);break;
+			case 0:motionManual->xMove(dMaxSpeedMode1,dMoveDistanceMode1,dAccelerationTimeMode1,intAccelerationMethodMode1);break;
+			case 2:motionManual->zMove(dMaxSpeedMode1,dMoveDistanceMode1,dAccelerationTimeMode1,intAccelerationMethodMode1);break;
+			case 3:motionManual->yMove(dMaxSpeedMode1,dMoveDistanceMode1,dAccelerationTimeMode1,intAccelerationMethodMode1);break;
 			}
 		}
 	}
-	else if(controlMode==1)
+	else if(intControlMode==2)
 	{
-		if(!checkPass)
+		if(!isCheckQualified)
 		{
 			QMessageBox msgBox;
 			msgBox.setText(QStringLiteral("参数设置出错，未能开始运动"));
@@ -97,183 +182,123 @@ void Manual::on_startPushButton_clicked()
 		}
 
 		
-		manualMotionObject->xMove(xMaxSpeedB,xMoveDistanceB,xAccTimeB,xAccModeB);
-		manualMotionObject->yMove(yMaxSpeedB,yMoveDistanceB,yAccTimeB,yAccModeB);
-		manualMotionObject->zMove(zMaxSpeedB,zMoveDistanceB,zAccTimeB,zAccModeB);
-
+		motionManual->xMove(dXMaxSpeedMode2,dXMoveDistanceMode2,
+			dXAccelerationTimeMode2,intXAccelerationMethodMode2);
+		motionManual->yMove(dYMaxSpeedMode2,dYMoveDistanceMode2,
+			dYAccelerationTimeMode2,intYAccelerationMethodMode2);
+		motionManual->zMove(dZMaxSpeedMode2,dZMoveDistanceMode2,
+			dZAccelerationTimeMode2,intZAccelerationMethodMode2);
 	}
-	
 }
 
 
-/*****************************************************************************
-Function:voidManual::on_stopPushButton_clicked()
-Description:响应手动控制界面对“停止”按钮的点击事件
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::on_stopPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonStop_clicked
+  Description: 停止运动
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::on_pushButtonStop_clicked()
 {
-	manualMotionObject->allStop();
+	motionManual->allStop();
 }
 
-/*****************************************************************************
-Function:Manual::on_returnOriginPushButton_clicked()
-Description:响应手动控制界面对“返回原点”按钮的点击事件
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::on_returnOriginPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonStart_clicked
+  Description:停止运动
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::on_pushButtonRecoverWeldTorch_clicked()
 {
 	qDebug()<<"on_returnOriginPushButton_clicked"<<endl;
 }
 
-
-/*****************************************************************************
-Function:void Manual::_fillDefaultParamters()
-Description:初始化默认参数
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::initializeParameters()
-{
-
-	//*************************单轴模式下的默认参数设定**************************//
-	axisA=3;					//默认轴号是3,对应选上X轴
-	rotationDirectionA=1;		//默认正向
-	motionModeA=2;			//默认定长运动
-	accelerationModeA=1;		//默认梯形加速
-	moveDistanceA=10.0;		//默认移动距离10mm
-	maxSpeedA=5.0;		//默认最高速度5mm/s	
-	accTimeA=0.2;				//默认加速时间0.5s
-
-	//*********************************************************************//
-
-	//*************************多轴模式下的默认参数设定**************************//
-	xMoveDistanceB=0;
-	xMaxSpeedB=5;
-	xAccTimeB=0.1;
-	xAccModeB=0;
-
-	yMoveDistanceB=0;
-	yMaxSpeedB=5;
-	yAccTimeB=0.1;
-	yAccModeB=0;
-
-	zMoveDistanceB=0;
-	zMaxSpeedB=5;
-	zAccTimeB=0.1;
-	zAccModeB=0;
-	//************************************************************************//
-
-	//*******************************焊接默认参数设定***************************//
-	weldVoltage=25;
-	weldCurrent=100;
-	feedRate=2;
-	gasFlow=0.5;
-	weldSwitchMode=0;		//=0为默认手动打开焊接
-	
-	//************************************************************************//
-
-	//*******************************单轴模式双轴模式设定***************************//
-	controlMode=0;
-	//************************************************************************//
-
-	//设置_weldingSwitchOnFlag为false
-	weldSwitchedOnFlag=false;
-}
-
-
-
-/*****************************************************************************
-Function:void Manual::_fillDefaultParamters()
-Description:往各种lineEdit里面填充默认参数。
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::fillDefaultParamters()
+/******************************************************************************
+  Function:fillDefaultConfiguration
+  Description: 填充默认的配置
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::fillDefaultConfiguration()
 {
 	QString str1,str2,str3,str4;
-	//******************************填充单轴模式下GroupBox的参数**************//
 	
-	str1 = QString::number((double)moveDistanceA);
-	str2 = QString::number((double)maxSpeedA);
-	str3 = QString::number((double)accTimeA);
+	str1 = QString::number((double)dMoveDistanceMode1);
+	str2 = QString::number((double)dMaxSpeedMode1);
+	str3 = QString::number((double)dAccelerationTimeMode1);
 
-	ui.distanceSettinglineEdit->setText(str1);
-	ui.speedSettingLineEdit->setText(str2);
-	ui.acceleratTimeTextLabel->setText(str3);
+	ui.lineEditDistance->setText(str1);
+	ui.lineEditSpeed->setText(str2);
+	ui.lineEditAccelerationTime->setText(str3);
 
-	ui.yRadioButton->setChecked(true);
-	ui.CWRadioButton->setChecked(true);
-	ui.fixedModeRadioButton->setChecked(true);
-	ui.trapeModeRadionButton->setChecked(true);
+	ui.radioButtonY->setChecked(true);
+	ui.radioButtonCW->setChecked(true);
+	ui.radioButtonFixedMotion->setChecked(true);
+	ui.radioButtonTrapezoidAcceleration->setChecked(true);
 
-	//************************************************************************//
+	str1 = QString::number((double)dXMoveDistanceMode2);
+	str2 = QString::number((double)dXMaxSpeedMode2);
+	str3 = QString::number((double)dXAccelerationTimeMode2);
+	ui.lineEditXDistance->setText(str1);
+	ui.lineEditXMaxSpeed->setText(str2);
+	ui.lineEditXAccelerationTime->setText(str3);
+	ui.radioButtonXTrapezoidAcceleration->setChecked(true);
 
-	//******************************填充多轴模式下GroupBox的参数**************//
+	str1 = QString::number((double)dYMoveDistanceMode2);
+	str2 = QString::number((double)dYMaxSpeedMode2);
+	str3 = QString::number((double)dYAccelerationTimeMode2);
+	ui.lineEditYDistance->setText(str1);
+	ui.lineEditYMaxSpeed->setText(str2);
+	ui.lineEditYAccelerationTime->setText(str3);
+	ui.radioButtonYTrapezoidAcceleration->setChecked(true);
 
-	str1 = QString::number((double)xMoveDistanceB);
-	str2 = QString::number((double)xMaxSpeedB);
-	str3 = QString::number((double)xAccTimeB);
-	ui.xDistanceSettingLineEdit->setText(str1);
-	ui.xSpeedSettingLineEdit->setText(str2);
-	ui.xAcceleratTimeLineEdit->setText(str3);
-	ui.xTrapeModeRadionButton->setChecked(true);
+	str1 = QString::number((double)dZMoveDistanceMode2);
+	str2 = QString::number((double)dZMaxSpeedMode2);
+	str3 = QString::number((double)dZAccelerationTimeMode2);
+	ui.lineEditZDistance->setText(str1);
+	ui.lineEditZMaxSpeed->setText(str2);
+	ui.lineEditZAccelerationTime->setText(str3);
+	ui.radioButtonZTrapezoidAcceleration->setChecked(true);
 
-	str1 = QString::number((double)yMoveDistanceB);
-	str2 = QString::number((double)yMaxSpeedB);
-	str3 = QString::number((double)yAccTimeB);
-	ui.yDistanceSettingLineEdit->setText(str1);
-	ui.ySpeedSettingLineEdit->setText(str2);
-	ui.yAcceleratTimeLineEdit->setText(str3);
-	ui.yTrapeModeRadionButton->setChecked(true);
+	//*********************填充焊接参数GroupBox的参数**************//
+	str1=QString::number((double)dWeldVoltage);
+	str2=QString::number((double)dWeldCurrent);
+	str3=QString::number((double)dWireRate);
+	str4=QString::number((double)dGasFlow);
+	ui.lineEditWeldVoltage->setText(str1);
+	ui.lineEditWeldCurrent->setText(str2);
+	ui.lineEditWireRate->setText(str3);
+	ui.lineEditGasFlow->setText(str4);
+	ui.radioButtonManuallySwitchOnWeld->setChecked(true);
+	ui.radioButtonAutomaticallySwitchOnWeld->setChecked(false);
 
-	str1 = QString::number((double)zMoveDistanceB);
-	str2 = QString::number((double)zMaxSpeedB);
-	str3 = QString::number((double)zAccTimeB);
-	ui.zDistanceSettingLineEdit->setText(str1);
-	ui.zSpeedSettingLineEdit->setText(str2);
-	ui.zAcceleratTimeLineEdit->setText(str3);
-	ui.zTrapeModeRadionButton->setChecked(true);
-
-	//************************************************************************//
-
-	//******************************填充焊接参数设置groupbox的内容*****************//
-	str1=QString::number((double)weldVoltage);
-	str2=QString::number((double)weldCurrent);
-	str3=QString::number((double)feedRate);
-	str4=QString::number((double)gasFlow);
-	ui.weldingVoltageSettingLineEdit->setText(str1);
-	ui.weldingCurrentSettingLineEdit->setText(str2);
-	ui.feedRateSettingLineEdit->setText(str3);
-	ui.gasFlowSettingLineEdit->setText(str4);
-	ui.manuallySwitchOnWeldingProcessRadioButton->setChecked(true);
-	ui.automaticallySwitchOnWeldingProcessRadioButton->setChecked(false);
-
-	//************************************************************************//
-
-	ui.controlMode1RadioButton->setChecked(true);
-
+	ui.radioButtonSingleAxleMode->setChecked(true);
 }
 
-/*****************************************************************************
-Function:void Manual::_updateParameters()
-Description:更新运动数据
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::updateParameters()
+/******************************************************************************
+  Function:checkConfiguration
+  Description: 检查设置是否符号
+  Calls: 
+  Called By: manual.cpp/on_pushButtonStart_Clicked
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::checkConfiguration()
 {
 	QString str1,str2,str3,str4;
 	double temp1,temp2,temp3,temp4;
@@ -282,239 +307,243 @@ void Manual::updateParameters()
 	bool conversionState3=true;
 
 
-	if(ui.controlMode1RadioButton->isChecked())//更新单轴模式下参数
+	if(ui.radioButtonSingleAxleMode->isChecked()) //单轴模式
 	{
-		//******************************更新单轴模式下GroupBox的参数**************//
+		//轴号
+		if (ui.radioButtonX->isChecked())
+			intAxleMode1 = 0;
+		else if (ui.radioButtonY->isChecked())		
+			intAxleMode1 = 3;
+		else if (ui.radioButtonZ->isChecked())		
+			intAxleMode1 = 2;
 	
-	//轴号
-	if (ui.xRadioButton->isChecked())			axisA = 0;
-	else if (ui.yRadioButton->isChecked())		axisA = 3;
-	else if (ui.zRadioButton->isChecked())		axisA = 2;
+		//方向
+		if (ui.radioButtonCW->isChecked())
+			intRotationDirectionMode1 = 1;
+		else if (ui.radioButtonCCW->isChecked())
+			intRotationDirectionMode1 = 2;
 	
-	//方向
-	if (ui.CWRadioButton->isChecked())			rotationDirectionA = 1;	//正向
-	else if (ui.CCWRatdioButton->isChecked())	rotationDirectionA = 2;	//负向
+		//运动模式
+		if (ui.radioButtonContinousMotion->isChecked())		
+			intAccelerationMethodMode1 = 1;
+		else if (ui.radioButtonFixedMotion->isChecked())	
+			intAccelerationMethodMode1 = 2;
 	
-	//运动模式
-	if (ui.cntnsModeRadioButton->isChecked())		motionModeA = 1;		//连续模式
-	else if (ui.fixedModeRadioButton->isChecked())	motionModeA = 2;		//定长运动
-	
-	//加速模式
-	if (ui.trapeModeRadionButton->isChecked())		accelerationModeA = 0;	//梯形加速
-	else if (ui.sigmoidRadioButton->isChecked())	accelerationModeA = 1;	//S加速
+		//加速模式
+		if (ui.radioButtonTrapezoidAcceleration->isChecked())		
+			intAccelerationMethodMode1 = 1;
+		else if (ui.radioButtonSigmoidAcceleration->isChecked())	
+			intAccelerationMethodMode1 = 2;	
 
-	//距离、速度、加速时间等
-	if(ui.distanceSettinglineEdit->isEnabled())	//连续模式下，distanceSettingLineEdit不可用
-	{	
-		str1 = ui.distanceSettinglineEdit->text();
-		temp1 = str1.toDouble();
-	}
-	else
+		//运动参数
+		if(ui.lineEditDistance->isEnabled())
+		{	
+			str1 = ui.lineEditDistance->text();
+			temp1 = str1.toDouble();
+		}
+		else
+		{
+			str1="";
+			temp1=-1;
+		}
+		str2 = ui.lineEditSpeed->text();
+		str3 = ui.lineEditAccelerationTime->text();
+	
+		temp2 = str2.toDouble();
+		temp3 = str3.toDouble();
+	
+		if (temp1 == 0.0)
+		{
+			QMessageBox msgbox;
+			msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
+			msgbox.exec();
+			isCheckQualified = false;
+			return;
+		}
+	
+		if (temp2 == 0.0)
+		{
+			QMessageBox msgbox;
+			msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
+			msgbox.exec();
+			isCheckQualified = false;
+			return;
+		}
+	
+		if (temp3 == 0.0)
+		{
+			QMessageBox msgbox;
+			msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
+			msgbox.exec();
+			isCheckQualified = false;
+			return;
+		}
+	
+		dMoveDistanceMode1 = temp1;
+		dMaxSpeedMode1 = temp2;
+		dAccelerationTimeMode1 = temp3;
+	
+	}// end of if(ui.controlMode1RadioButton->isChecked())
+	else if(ui.radioButtonMultipleAxlesMode->isChecked())//多轴模式
 	{
-		str1="";
-		temp1=-1;
-	}
-	str2 = ui.speedSettingLineEdit->text();
-	str3 = ui.acceleratTimeTextLabel->text();
-	
-	temp2 = str2.toDouble();
-	temp3 = str3.toDouble();
-	
-	if (temp1 == 0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
-		msgbox.exec();
-		checkPass = 0;		//格式检查不通过
-		return;
-	}
-	
-	if (temp2 == 0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
-		msgbox.exec();
-		checkPass = 0;		//格式检查不通过
-		return;
-	}
-	
-	if (temp3 == 0.0)
-	{
-		QMessageBox msgbox;
-		msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
-		msgbox.exec();
-		checkPass = 0;
-		return;
-	}
-	
-	moveDistanceA = temp1;
-	maxSpeedA = temp2;
-	accTimeA = temp3;
-	
-	}
-	else if(ui.controlMode2RadioButton->isChecked())//更新多轴模式下参数
-	{
+			//X轴
+			if(ui.radioButtonXTrapezoidAcceleration->isChecked()) 
+				intXAccelerationMethodMode2=0;
+			else if(ui.radioButtonXSigmoidAcceleration->isChecked()) 
+				intXAccelerationMethodMode2=1;
+
+			str1=ui.lineEditXDistance->text();
+			str2=ui.lineEditXMaxSpeed->text();
+			str3=ui.lineEditXAccelerationTime->text();
 		
-		//********************************X轴*********************************//
-		if(ui.xTrapeModeRadionButton->isChecked()) xAccModeB=0;
-		else if(ui.xSigmoidRadioButton->isChecked()) xAccModeB=1;
+			temp1=str1.toDouble(&conversionState1);
+			temp2 = str2.toDouble(&conversionState2);
+			temp3 = str3.toDouble(&conversionState3);
 
-		str1=ui.xDistanceSettingLineEdit->text();
-		str2=ui.xSpeedSettingLineEdit->text();
-		str3=ui.xAcceleratTimeLineEdit->text();
-		
-		temp1=str1.toDouble(&conversionState1);
-		temp2 = str2.toDouble(&conversionState2);
-		temp3 = str3.toDouble(&conversionState3);
+			if(temp1==0.0 && conversionState1==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;
+				return;
+			}
 
-		if(temp1==0.0 && conversionState1==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
+			if(temp2==0.0 && conversionState2==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;	
+				return;
+			}
 
-		if(temp2==0.0 && conversionState2==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
+			if(temp3==0.0 && conversionState3==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;
+				return;
+			}
 
-		if(temp3==0.0 && conversionState3==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
-
-		xMoveDistanceB=temp1;
-		xMaxSpeedB=temp2;
-		xAccTimeB=temp3;
-
-		//***************************************************************************//
-
-		//**********************************Y轴**************************************//
-		if(ui.yTrapeModeRadionButton->isChecked()) yAccModeB=0;
-		else if(ui.ySigmoidRadioButton->isChecked()) yAccModeB=1;
-
-		str1=ui.yDistanceSettingLineEdit->text();
-		str2=ui.ySpeedSettingLineEdit->text();
-		str3=ui.yAcceleratTimeLineEdit->text();
-
-		temp1=str1.toDouble(&conversionState1);
-		temp2 = str2.toDouble(&conversionState2);
-		temp3 = str3.toDouble(&conversionState3);
-
-		if(temp1==0.0 && conversionState1==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
-
-		if(temp2==0.0 && conversionState2 == false) 
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
-
-		if(temp3==0.0 && conversionState3==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
-
-		yMoveDistanceB=temp1;
-		yMaxSpeedB=temp2;
-		yAccTimeB=temp3;
-
-		//***************************************************************************//
+			dXMoveDistanceMode2=temp1;
+			dXMaxSpeedMode2=temp2;
+			dXAccelerationTimeMode2=temp3;
 
 
-		//**********************************Z轴**************************************//
-		if(ui.zTrapeModeRadionButton->isChecked()) zAccModeB=0;
-		else if(ui.zSigmoidRadioButton->isChecked()) zAccModeB=1;
+			//Y轴
+			if(ui.radioButtonYTrapezoidAcceleration->isChecked()) 
+				intYAccelerationMethodMode2=0;
+			else if(ui.radioButtonYSigmoidAcceleration->isChecked()) 
+				intYAccelerationMethodMode2=1;
 
-		str1=ui.zDistanceSettingLineEdit->text();
-		str2=ui.zSpeedSettingLineEdit->text();
-		str3=ui.zAcceleratTimeLineEdit->text();
+			str1=ui.lineEditYDistance->text();
+			str2=ui.lineEditYMaxSpeed->text();
+			str3=ui.lineEditYAccelerationTime->text();
+	
+			temp1=str1.toDouble(&conversionState1);
+			temp2 = str2.toDouble(&conversionState2);
+			temp3 = str3.toDouble(&conversionState3);
 
-		temp1 = str1.toDouble(&conversionState1);
-		temp2 = str2.toDouble(&conversionState2);
-		temp3 = str3.toDouble(&conversionState3);
+			if(temp1==0.0 && conversionState1==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;	
+				return;
+			}
 
-		if(temp1==0.0 && conversionState1==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
+			if(temp2==0.0 && conversionState2 == false) 
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;	
+				return;
+			}
 
-		if(temp2==0.0 && conversionState2==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
+			if(temp3==0.0 && conversionState3==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;		
+				return;
+			}
 
-		if(temp3==0.0 &&conversionState3==false)
-		{
-			QMessageBox msgbox;
-			msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
-			msgbox.exec();
-			checkPass = 0;		//格式检查不通过
-			return;
-		}
+			dYMoveDistanceMode2=temp1;
+			dYMaxSpeedMode2=temp2;
+			dYAccelerationTimeMode2=temp3;
 
-		zMoveDistanceB=temp1;
-		zMaxSpeedB=temp2;
-		zAccTimeB=temp3;
+			//Z轴
+			if(ui.radioButtonZTrapezoidAcceleration->isChecked())
+				intZAccelerationMethodMode2=1;
+			else if(ui.radioButtonZSigmoidAcceleration->isChecked()) 
+				intZAccelerationMethodMode2=2;
 
-		//***************************************************************************//
+			str1=ui.lineEditZDistance->text();
+			str2=ui.lineEditZMaxSpeed->text();
+			str3=ui.lineEditZAccelerationTime->text();
 
+			temp1 = str1.toDouble(&conversionState1);
+			temp2 = str2.toDouble(&conversionState2);
+			temp3 = str3.toDouble(&conversionState3);
 
-	}
+			if(temp1==0.0 && conversionState1==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("移动距离输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;
+				return;
+			}
 
-	//****************************更新焊接参数GroupBox的参数*************************//
-	str1=ui.weldingVoltageSettingLineEdit->text();
-	str2=ui.weldingCurrentSettingLineEdit->text();
-	str3=ui.feedRateSettingLineEdit->text();
-	str4=ui.gasFlowSettingLineEdit->text();
+			if(temp2==0.0 && conversionState2==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("最高速度输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;
+				return;
+			}
+
+			if(temp3==0.0 &&conversionState3==false)
+			{
+				QMessageBox msgbox;
+				msgbox.setText(QStringLiteral("加速时间输入错误，请更正！"));
+				msgbox.exec();
+				isCheckQualified = false;
+				return;
+			}
+			dZMoveDistanceMode2=temp1;
+			dZMaxSpeedMode2=temp2;
+			dZAccelerationTimeMode2=temp3;
+	}//else if(ui.radioButton2AxlesMode->isChecked())
+
+	//更新焊接参数
+	str1=ui.lineEditWeldVoltage->text();
+	str2=ui.lineEditWeldCurrent->text();
+	str3=ui.lineEditWireRate->text();
+	str4=ui.lineEditGasFlow->text();
 
 	temp1=str1.toDouble();
 	temp2=str2.toDouble();
 	temp3=str3.toDouble();
 	temp4=str4.toDouble();
 
-	if(ui.manuallySwitchOnWeldingProcessRadioButton->isChecked()) weldSwitchMode=0;
-	else if(ui.automaticallySwitchOnWeldingProcessRadioButton->isChecked()) weldSwitchMode=1;
+	if(ui.radioButtonManuallySwitchOnWeld->isChecked()) 
+		intWeldStartCondition=1;
+	else if(ui.radioButtonAutomaticallySwitchOnWeld->isChecked()) 
+		intWeldStartCondition=2;
 
-	//检查
 	if(temp1==0.0)
 	{
 		QMessageBox msgbox;
 		msgbox.setText(QStringLiteral("焊接电压输入错误，请更正！"));
 		msgbox.exec();
-		checkPass = 0;		//格式检查不通过
+		isCheckQualified = false;
 		return;
 	}
 
@@ -523,7 +552,7 @@ void Manual::updateParameters()
 		QMessageBox msgbox;
 		msgbox.setText(QStringLiteral("焊接电流输入错误，请更正！"));
 		msgbox.exec();
-		checkPass = 0;		//格式检查不通过
+		isCheckQualified = false;
 		return;
 	}
 
@@ -532,7 +561,7 @@ void Manual::updateParameters()
 		QMessageBox msgbox;
 		msgbox.setText(QStringLiteral("送丝速度输入错误，请更正！"));
 		msgbox.exec();
-		checkPass = 0;		//格式检查不通过
+		isCheckQualified = false;
 		return;
 	}
 
@@ -541,90 +570,111 @@ void Manual::updateParameters()
 		QMessageBox msgbox;
 		msgbox.setText(QStringLiteral("保护气流速输入错误，请更正！"));
 		msgbox.exec();
-		checkPass = 0;		//格式检查不通过
+		isCheckQualified = false;
 		return;
 	}
 
-	weldVoltage=temp1;
-	weldCurrent=temp2;
-	feedRate=temp3;
-	gasFlow=temp4;
+	dWeldVoltage=temp1;
+	dWeldCurrent=temp2;
+	dWireRate=temp3;
+	dGasFlow=temp4;
 
-	//********************************************************************************//
 
-	//**********************************更新控制模式***********************************//
-	if(ui.controlMode1RadioButton->isChecked())	controlMode=0;
-	else if(ui.controlMode2RadioButton->isChecked()) controlMode=1;
-	//**********************************************************************************//
+	if(ui.radioButtonSingleAxleMode->isChecked())	
+		intControlMode=1;
+	else if(ui.radioButtonMultipleAxlesMode->isChecked()) 
+		intControlMode=2;
 
-	checkPass = 1;		//检查通过
-
+	isCheckQualified = true;	
 }
 
-void Manual::on_cntnsModeRadioButton_toggled()
+/******************************************************************************
+  Function:on_radioButtonContinousMotion_toggled
+  Description: 切换到连续运动模式
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::on_radioButtonContinousMotion_toggled()
 {
-	ui.distanceSettinglineEdit->setEnabled(false);
+	ui.lineEditDistance->setEnabled(false);
 }
 
-void Manual::on_fixedModeRadioButton_toggled()
+/******************************************************************************
+  Function:on_radioButtonFixedMotion_toggled
+  Description: 切换到定长运动模式
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::on_radioButtonFixedMotion_toggled()
 {
-	ui.distanceSettinglineEdit->setEnabled(true);
+	ui.lineEditDistance->setEnabled(true);
 }
 
-
-
-/*****************************************************************************
-Function:_switchOnWelding
-Description:开启焊接。因为通用输出口4连接了继电器。所以是通过控制继电器4来控制焊接的启动
-电平由高变低，开始焊接。
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
+/******************************************************************************
+  Function:switchOnWeld
+  Description: 开启焊接
+  Calls: manual.cpp/switchOnWeld
+  Called By: manual.cpp/on_pushButtonSwitchOnWeld_click
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 void Manual::switchOnWeld()
 {
 	d1000_out_bit(4,0);
 }
 
-
-/*****************************************************************************
-Function:_switchOffWelding
-Description:电平由低到高，关闭焊接。
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
+/******************************************************************************
+  Function:switchOffWeld
+  Description: 关闭焊接
+  Calls: 
+  Called By: manual.cpp/on_pushButtonSwitchOffWeld_click
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
 void Manual::switchOffWeld()
 {
 	d1000_out_bit(4,1);
 }
 
-
-/*****************************************************************************
-Function:on_switchOnWeldingProcessPushButton_clicked
-Description:响应“开始焊接”pushButton的点击事件。
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::on_switchOnWeldPushButton_clicked()
+/******************************************************************************
+  Function:switchOffWeld
+  Description: 
+  Calls: manual.cpp/switchOffWeld
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::on_pushButtonSwitchOnWeld_clicked()
 {
 	switchOnWeld();
 }
 
 
-/*****************************************************************************
-Function:on_switchOffWeldingProcessPushButton_clicked
-Description:响应“关闭焊接”pushButton的点击事件。
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void Manual::on_switchOffWeldPushButton_clicked()
+/******************************************************************************
+  Function:on_pushButtonSwitchOffWeld_clicked
+  Description: 
+  Calls: manual.cpp/switchOffWeld
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void Manual::on_pushButtonSwitchOffWeld_clicked()
 {
 	switchOffWeld();
 }

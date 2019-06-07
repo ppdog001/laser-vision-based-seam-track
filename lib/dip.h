@@ -1,3 +1,36 @@
+/******************************************************************************
+  File name: dip.h
+  Author: WillLi99		Date:2019-6-6
+  Description: 定义图像处理类，其任务是处理结构光图像，获得ROI细化图像和计算一些焊缝数据。
+  Others: 
+  Function List:
+				DIP				//DIP类构造函数
+				getImageSize	//获得原始图像尺寸
+				getGrayImage	//获得原始图的灰度图
+				getROI			//截取ROI
+  				getWeldSeamType				//焊缝类型分类
+  				processLaserStripeImage		//处理激光条纹图像
+  				filterLaserStripeImage		//激光条纹图像滤波
+  				thinLaserStripeImage		//激光条纹图像细化
+  				fitLaserStripeImage			//激光条纹图像拟合
+  				findFittingData				//查找用来拟合的数据
+  				findFeaturePoints			//定位焊缝特征点
+  				updateLastFrame				//更新lastFrame
+				generateOutImage			//产生输出图像
+  				generateOffset				//产出焊缝偏差
+  				generateDIPResult			//产出图像计算结果
+  				qImage2Mat					
+  				mat2QImage
+				getROIPosition				//计算ROI位置
+				det							//求两个向量组成矩阵的行列式
+				drawDashLine				//画虚线
+				drawAsterisk				//标星
+
+  History: 
+          <author>		<time>       <desc>
+           WillLi99    2019-6-6     添加dip.h头部注释
+******************************************************************************/
+
 #pragma once
 
 #ifndef _DIP_H_
