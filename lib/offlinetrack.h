@@ -15,6 +15,8 @@
 			   stop150msTiming		//150ms定时
 			   switchOnWeld			//开启焊接
 			   switchOffWeld		//关闭焊接
+			   referenceTrack
+			   globalCoordinateTrack
 
 			   synchoriWeldParameters				//同步焊接参数
 			   syncHorizontalCalibrationRatio		//同步水平标定比率
@@ -32,13 +34,14 @@
   History: 
           <author>		<time>       <desc>
            WillLi99    2019-5-20     添加offlinetrack.h头部注释
+
 ******************************************************************************/
 
 #ifndef _OFFLINETRACK_H
 #define _OFFLINETRACK_H
 
 #include "ui_offlinetrack.h"
-#include "var.h"
+#include "common.h"
 #include "motion.h"
 #include "dip.h"
 #include "dmc1000.h"

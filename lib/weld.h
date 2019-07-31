@@ -20,7 +20,7 @@
 #pragma once
 
 #include "ui_weld.h"
-#include "var.h"
+#include "common.h"
 
 //焊接参数类
 class Weld :
@@ -39,13 +39,15 @@ private:
 	double dWeldCurrent;
 	double dWeldDistance;
 	WeldParameter wpWeldParameter;
+	SeamTrackParameter spSeamTrackParameter;
 
 	void setDefaultParameters();
 	bool checkWeldParameters();
 
 private slots:
-	void on_confirmPushButton_clicked();
-	void on_cancelPushButton_clicked();
+	void on_pushButtonConfirm_clicked();
+	void on_pushButtonCancel_clicked();
 signals:
-	void updateWeldParameters_triggered(WeldParameter paramters);
+	void updateWeldParameters_triggered(WeldParameter parameters);
+	void updateSeamTrackParameters_triggerd(SeamTrackParameter parameters);
 };

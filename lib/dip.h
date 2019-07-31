@@ -38,70 +38,81 @@
 #include <vector>
 #include <QImage>
 #include "dip.h"
-#include "var.h"
+#include "common.h"
 
 //图像处理类
 class DIP
 {
 private:
-	enum SeamType seam;
+	enum SeamType weldSeamType;
 	
 	Mat image;
 	Mat gray;
 	int width;
 	int height;
 
-	Mat roi;
-	int roiWidth;
-	int roiHeight;
-
+	Mat roi1;
+	int roi1X;
+	int roi1Y;
+	int roi1Width;
+	int roi1Height;
+	
+	Mat roi2;
+	int roi2X;
+	int roi2Y;
+	int roi2Width;
+	int roi2Height;
 
 	Mat filteredImage;
 	Mat filteredImageDoubleType;
-	Mat binImageOTSU;
+
+	Mat filteredImage2;
+	
 	Mat thinnedImage;
+	Mat thinnedImageProfile;
+	Mat thinnedImage2;
+	Mat thinnedImageProfile2;
 
-	Mat thinnedImageInfo;	
-
-	Points linePoints;	//用来做直线拟合的点
-	Line fittedLineEquation;				//带4个元素的一个向量
-
-	PointsD featurePoints;
-	Point2i centerPoint;
+	vector<Point2d> featurePoints;
+	Point2i weldSeamCenterPoint;
 
 private:
 	void getImageSize();
 	void getGrayImage();
 	void getROI();
-	void getWeldSeamType();
+	void classify();
 	
 	void processLaserStripeImage();	
-	void filterLaserStripeImage(int method=0);
-	void thinLaserStripeImage();
-	void fitLaserStripeImage();
-	PointMat findFittingData();
-	void findFeaturePoints();
+	void filter(int filterMethod=FILTER_MED_33);
+	void thin(int thinningMethod=INTENSITY_GRAVITY);
+	void extractFeaturePoints(int extractionMethod=EXTRACTION_ITERATION);
 	void updateLastFrame();
 
 	void generateOutImage();
 	void generateOffset();
-	void generateDIPResult();
+	void generateWeldSeamInfo();
 public:
-	QImage out;	
-	Mat outputImage;
+	QImage qOutputImage;	
+	Mat mOutputImage;
 	int offset;
-	SeamInfo seaminfo;
+	SeamInfo seamProfileInfo;
 
-	static void getROIPosition(Mat& image, int* ROIX, int* ROIY);
+	static void setROISize(int width,int height);
+	static void locateROI(Mat& image);
 
-	DIP(Mat receivedImage);
+	DIP(Mat mInputImage);
 
 	static Mat qImage2Mat(QImage in);
 	static QImage mat2QImage(Mat& in);
+	
+	static int roiWidth;
+	static int roiHeight;
 	static int roiX;		//ROI在gray中的横轴位置
 	static int roiY;		//ROI在gray中的纵轴位置
+	static int roiCenterX;
+	static int roiCenterY;
 	static Mat lastFrame;			//上一帧图像
-	static int nth;
+	static int nthFrame;
 
 	double det(Point2i a,Point2i b);
 	void drawDashLine(Mat& image,Point pt1, Point pt2,Scalar& color,int thickness);

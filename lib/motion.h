@@ -27,7 +27,7 @@
 #ifndef MOTION_H
 #define MOTION_H
 
-#include "var.h"
+#include "common.h"
 
 #define AXISX 0
 #define AXISY 3

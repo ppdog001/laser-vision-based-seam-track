@@ -18,7 +18,7 @@
 				12. on_horizontalSliderExposure_valueChanged		//改变曝光值
 				13  on_checkBoxGain_toggled			//自动增益
 				14. on_checkBoxExposure_toggled		//自动曝光
-				15. initializeParamters				//初始化配置
+				15. initialize						//初始化配置
   History: 
           <author>		<time>       <desc>
            WillLi99    2019-5-18     添加camra.h头部注释
@@ -27,7 +27,7 @@
 #ifndef Camera_H
 #define Camera_H
 #include "ui_camera.h"
-#include "var.h"
+#include "common.h"
 
 //相机控制类
 class Camera:public QWidget
@@ -56,7 +56,9 @@ private slots:
 private:
 	Ui_Camera ui;
 	int intCameraIndex;
-	void initializeCameraConfiguration();
+	bool bAGC;
+	bool bAEC;
+	void initialize();
 
 signals:
 	void saveSingleImage_triggered();

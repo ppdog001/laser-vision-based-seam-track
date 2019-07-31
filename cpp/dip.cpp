@@ -30,14 +30,20 @@
   History: 
           <author>		<time>       <desc>
            WillLi99    2019-6-6     添加dip.cpp头部注释
+		   WillLi99    2019-6-10    thinLaserStripe加入极大值法求细化线
+		   WillLi99    2019-6-10    findFeaturePoint加入一阶求导法定位焊缝特征点
 ******************************************************************************/
 #include "time.h"
 #include "dip.h"
 
 Mat DIP::lastFrame;
+int DIP::roiWidth=0;
+int DIP::roiHeight=0;
 int DIP::roiX=0;
 int DIP::roiY=0;
-int DIP::nth=0;
+int DIP::roiCenterX=0;
+int DIP::roiCenterY=0;
+int DIP::nthFrame=0;
 
 /*****************************************************************************
 Function:DIP
@@ -49,10 +55,10 @@ Output:
 Return:
 Others:
 *****************************************************************************/
-DIP::DIP(Mat receivedImage)
+DIP::DIP(Mat mInputImage)
 {
-	nth=nth+1;
-	receivedImage.copyTo(image);
+	nthFrame=nthFrame+1;
+	mInputImage.copyTo(image);
 	processLaserStripeImage();
 }
 
@@ -76,7 +82,7 @@ void DIP::getImageSize()
 /*****************************************************************************
 Function:getROI
 Description: 裁剪原图,获得ROI区域，是为了降低运算量。根据投影分布裁剪原图，产生大小
-		为400*100的ROI图。
+		为400*200的ROI图。
 Call:
 Called By:
 Input:
@@ -86,10 +92,19 @@ Others:
 *****************************************************************************/
 void DIP::getROI()
 {
-	roiWidth=400;
-	roiHeight=100;
-	roi=gray(Range(roiY,roiY+roiHeight),
-		Range(roiX,roiX+roiWidth));
+	roi1Width=DIP::roiWidth;
+	roi1Height=DIP::roiHeight;
+	roi1X=DIP::roiX;
+	roi1Y=DIP::roiY;
+
+	roi2Width=roi1Width;
+	roi2Height=40;		//20 pixels
+	roi2X=DIP::roiX;
+	roi2Y=DIP::roiCenterY-roi2Height/2;
+	roi1=gray(Range(DIP::roiY,DIP::roiY+roi1Height),
+		Range(DIP::roiX,DIP::roiX+roi1Width));
+	roi2=gray(Range(roi2Y,roi2Y+roi2Height),
+		Range(roi2X,roi2X+roi2Width));
 }
 
 /*****************************************************************************
@@ -110,105 +125,138 @@ void DIP::getGrayImage()
 
 /*****************************************************************************
 Function:thinLaserStripeImage
-Description: 获得细化图像
+Description: 获得细化图像.
 Call:
 Called By:
-Input:
-Output:thinnedImage，其为对filteredImage进行细化后的图像。binImageOTSU为利用OTSU
-		自动阈值分割得到的二值图像
+Input: INTENSITY_GRAVITY是灰度重心法；INTENSITY_MAXIMUM是灰度极值法
+Output:thinnedImage，其为对filteredImage进行细化后的图像。
 Return:
 Others:
 *****************************************************************************/
-void DIP::thinLaserStripeImage()
+void DIP::thin(int thinningMethod)
 {
-	filteredImage.convertTo(filteredImageDoubleType,CV_64FC1);
-	
-	//灰度重心法获得细化图像
-	Mat assistA=Mat::ones(Size(roiHeight,1),CV_64FC1);
-	vector<double> assist;for(int i=0;i<roiHeight;i++) assist.push_back(i);
-	Mat assistB=Mat(assist); 
-	Mat assistBT=assistB.t();
-	
-	Mat num=assistBT*filteredImageDoubleType;
-	Mat den=assistA*filteredImageDoubleType;
-	thinnedImageInfo=num/den; 
-	thinnedImageInfo.convertTo(thinnedImageInfo,CV_8UC1);	//转成UINT8类型
-
-	thinnedImage=Mat::zeros(Size(roiWidth,roiHeight),CV_8UC1);
-	uchar* ptr=thinnedImageInfo.ptr<uchar>(0);
-	for (int i=0;i<roiWidth;i++)
+	if(thinningMethod==INTENSITY_GRAVITY)//灰度重心法获得细化图像
 	{
-		if(ptr[i])
+		filteredImage.convertTo(filteredImageDoubleType,CV_64FC1);	
+		
+		Mat assistA=Mat::ones(Size(roiHeight,1),CV_64FC1);
+		vector<double> assist;for(int i=0;i<roiHeight;i++) assist.push_back(i);
+		Mat assistB=Mat(assist); 
+		Mat assistBT=assistB.t();
+	
+		Mat num=assistBT*filteredImageDoubleType;
+		Mat den=assistA*filteredImageDoubleType;
+		thinnedImageProfile=num/den; 
+		thinnedImageProfile.convertTo(thinnedImageProfile,CV_8UC1);	//转成UINT8类型
+
+		thinnedImage=Mat::zeros(Size(roiWidth,roiHeight),CV_8UC1);
+		uchar* ptr=thinnedImageProfile.ptr<uchar>(0);
+		for (int i=0;i<roiWidth;i++)
 		{
-			thinnedImage.at<uchar>(ptr[i],i)=255;
+			if(ptr[i])
+			{
+				thinnedImage.at<uchar>(ptr[i],i)=255;
+			}
 		}
 	}
-		
-}
-
-/*****************************************************************************
-Function:findFittingData
-Description: 从thinnedImage中寻找用来做直线拟合的数据点。
-Call:
-Called By:
-Input:
-Output:
-Return:
-Others:注意：具体返回多少组数据点，和焊缝类型有关
-*****************************************************************************/
-PointMat DIP::findFittingData()
-{
-	PointMat pointsSet;
-	Points points;
-	switch(seam)
+	else if(thinningMethod==INTENSITY_MAXIMUM)//灰度极值法求结构光条纹细化中心线
 	{
-	case BUTT_WELD_SEAM:
-		for(int i=roiHeight/2-5;i<=roiHeight/2+5;i++)
+		vector<int> maximumPixelCoordinateY;
+
+		INT32* ptr;
+		unsigned char pixelValue;
+
+		unsigned char temp_pixel_value;
+		unsigned char temp_position;
+		const unsigned char maxPixelValue=255;
+		const unsigned char thresh=(unsigned char)maxPixelValue*0.4;
+		thinnedImageProfile=Mat::zeros(1,roi1Width,CV_32SC1);
+		thinnedImageProfile2=Mat::zeros(1,roi2Width,CV_32SC1);
+
+		//处理thinnedImage
+		for(int c=0;c<roi1Width;c++)
 		{
-			uchar* ptr=thinnedImage.ptr<uchar>(i);
-			for(int j=0;j<roiWidth;j++)
+			pixelValue=filteredImage.at<uchar>(0,c);
+			maximumPixelCoordinateY.clear();
+			for(int r=0;r<roi1Height;r++)
 			{
-				if(ptr[j])
+				temp_pixel_value=filteredImage.at<uchar>(r,c);
+				if(temp_pixel_value>pixelValue)
 				{
-					points.push_back(Point2i(i,j));		//找到用来做直线拟合的数据点
+					pixelValue=temp_pixel_value;
+					temp_position=r;
 				}
+				if(temp_pixel_value==maxPixelValue)
+				{
+					maximumPixelCoordinateY.push_back(r);
+				}
+			}
+			if(maximumPixelCoordinateY.size()!=0)
+			{
+				thinnedImageProfile.at<INT32>(0,c)=0.5*(maximumPixelCoordinateY[0]+
+					maximumPixelCoordinateY[maximumPixelCoordinateY.size()-1]);
+			}
+			else
+			{
+				thinnedImageProfile.at<INT32>(0,c)=temp_position;
+			}
+		}
+	
+		thinnedImage=Mat::zeros(Size(roi1Width,roi1Height),CV_8UC1);
+		ptr=thinnedImageProfile.ptr<INT32>(0);
+		for (int i=0;i<roiWidth;i++)
+		{
+			if(ptr[i])
+			{
+				thinnedImage.at<uchar>(ptr[i],i)=255;
 			}
 		}
 
-		pointsSet.push_back(points);	
-		break;
-	case LAP_WELD_SEAM:
-		break;
-	case GROOVE_WELD_SEAM:
-		break;
+		//imshow("thin version",thinnedImage);waitKey();
+		imwrite("..//images//qOutputImage.tif",thinnedImage);
+
+		//处理thinnedImage2
+
+		for(int c=0;c<roi2Width;c++)
+		{
+			maximumPixelCoordinateY.clear();
+			for(int r=0;r<roi2Height;r++)
+			{
+				temp_pixel_value=filteredImage2.at<uchar>(r,c);
+				if(temp_pixel_value>thresh)
+				{
+					maximumPixelCoordinateY.push_back(r);
+				}
+			}
+			if(maximumPixelCoordinateY.size()!=0)
+			{
+				thinnedImageProfile2.at<INT32>(0,c)=0.5*(maximumPixelCoordinateY[0]+
+					maximumPixelCoordinateY[maximumPixelCoordinateY.size()-1]);
+			}
+			else
+			{
+				thinnedImageProfile2.at<INT32>(0,c)=0;
+			}
+		}
+
+		thinnedImage2=Mat::zeros(Size(roi2Width,roi2Height),CV_8UC1);
+		ptr=thinnedImageProfile2.ptr<INT32>(0);
+		for (int i=0;i<roi2Width;i++)
+		{
+			if(ptr[i])
+			{
+				thinnedImage2.at<uchar>(ptr[i],i)=255;
+			}
+		}
+		imwrite("..//images//qOutputImage2.tif",thinnedImage2);
 	}
-
-	return pointsSet;
+	return;
 }
-
-/*****************************************************************************
-Function:fitLaserStripeImage
-Description: 线性拟合
-Call:
-Called By:
-Input:
-Output:
-Return:
-Others:
-*****************************************************************************/
-void DIP::fitLaserStripeImage()
-{
-	PointMat dataSet;
-	// 针对不同的焊缝类型，拟合直线的线段亦有所不同
-	dataSet=findFittingData();
-	cv::fitLine(dataSet[0], fittedLineEquation, CV_DIST_L2, 0, 0.01, 0.01);
-
-}
-
 
 /*****************************************************************************
 Function:findFeaturePoints
-Description: 定位焊缝特征点，不同的焊缝有不同的特征点数量和定位方法。
+Description: 识别焊缝特征点。EXTRACTION_ITERATEION为用迭代查找算法识别焊缝特征点；
+            EXTRACTION_DIFFERENTIAL为用一阶微分法定位焊缝特征点
 Call:
 Called By:
 Input:
@@ -216,19 +264,18 @@ Output:
 Return:
 Others:
 *****************************************************************************/
-void DIP::findFeaturePoints()
+void DIP::extractFeaturePoints(int extractionMethod)
 {
-	//用Douglas–Peucker算法获得焊缝特征点
-	if(seam==BUTT_WELD_SEAM)
+	if(extractionMethod==EXTRACTION_ITERATION) //用迭代查找算法识别焊缝特征点
 	{
-		int width=thinnedImageInfo.cols;
+		int width=thinnedImageProfile.cols;
 		Point2i vertexPoint;
 		Point2i startPoint;
 		Point2i endPoint;
 
 		//找到vertexPoint
-		uchar* ptr=thinnedImageInfo.ptr<uchar>();
-		uint yValue=thinnedImageInfo.ptr<uchar>()[0];
+		uchar* ptr=thinnedImageProfile.ptr<uchar>();
+		uint yValue=thinnedImageProfile.ptr<uchar>()[0];
 		for(int i=0;i<width;i++)
 		{
 			if(i==0)	startPoint=Point2i(0,ptr[i]);
@@ -239,10 +286,6 @@ void DIP::findFeaturePoints()
 				vertexPoint=Point2i(i,yValue);
 			}
 		}
-
-		//qDebug()<<"vertex Point is "<<vertexPoint.x<<","<<vertexPoint.y<<endl;
-		//qDebug()<<"start Point is "<<startPoint.x<<","<<startPoint.y<<endl;
-		//qDebug()<<"endPoint is"<<endPoint.x<<","<<endPoint.y<<endl;
 
 		double dist1=sqrt((double)(vertexPoint.x-startPoint.x)*(vertexPoint.x-startPoint.x)+
 			(vertexPoint.y-startPoint.y)*(vertexPoint.y-startPoint.y));
@@ -258,7 +301,7 @@ void DIP::findFeaturePoints()
 		double tempDist=0;
 		Point2i vecTemp;
 		Point2i vecA=vertexPoint-startPoint;
-		ptr=thinnedImageInfo.ptr<uchar>();
+		ptr=thinnedImageProfile.ptr<uchar>();
 		for(int i=1;i<vertexPoint.x;i++)
 		{
 			if(ptr[i]==0)
@@ -305,9 +348,40 @@ void DIP::findFeaturePoints()
 	
 		featurePoints.push_back(featurePointA);
 		featurePoints.push_back(featurePointB);
-	}
-		/*qDebug()<<"featurePointA"<<featurePoints[0].x<<","<<featurePoints[0].y<<endl;
-		qDebug()<<"featurePointB"<<featurePoints[1].x<<","<<featurePoints[1].y<<endl;*/
+	}// end of if(method==1)
+	else if(extractionMethod==EXTRACTION_DIFFERENTIAL)
+	{
+		vector<INT32> diffProfile;
+		INT32* ptr=thinnedImageProfile2.ptr<INT32>(0);
+		for(int i=1;i<roi2Width;i++)
+			diffProfile.push_back(ptr[i]-ptr[i-1]);
+
+		int minimumValuePosition,maximumValuePosition;
+		int minimumValue=0;int maximumValue=0;
+		for(int i=0;i<diffProfile.size();i++)
+		{
+			if(minimumValue>diffProfile[i])
+			{
+				minimumValue=diffProfile[i];
+				minimumValuePosition=i;
+			}
+			if(maximumValue<diffProfile[i])
+			{
+				maximumValue=diffProfile[i];
+				maximumValuePosition=i;
+			}
+		}
+		
+		Point2i featurePointA;
+		Point2i featurePointB;
+
+		featurePointA=Point2i(minimumValuePosition,thinnedImageProfile2.ptr<int>(0)[
+			minimumValuePosition]);
+		featurePointB=Point2i(maximumValuePosition+1,thinnedImageProfile2.ptr<int>(0)[
+			maximumValuePosition+1]);
+		featurePoints.push_back(featurePointA);
+		featurePoints.push_back(featurePointB);
+	}//// end of if(method==2)
 }
 
 /*****************************************************************************
@@ -322,11 +396,10 @@ Others:
 *****************************************************************************/
 void DIP::generateOutImage()
 {
-
 	//用小十字架标出特征点的位置
-	int horizontalShift=(width-roiWidth)/2;
-	Point2i leftFeaturePoint=Point2i(horizontalShift+featurePoints[0].x,featurePoints[0].y+roiY);
-	Point2i rightFeaturePoint=Point2i(horizontalShift+featurePoints[1].x,featurePoints[1].y+roiY);
+	int horizontalShift=(width-roi1Width)/2;
+	Point2i leftFeaturePoint=Point2i(horizontalShift+featurePoints[0].x,featurePoints[0].y+roiY+roi1Height/2-roi2Height/2);
+	Point2i rightFeaturePoint=Point2i(horizontalShift+featurePoints[1].x,featurePoints[1].y+roiY+roi1Height/2-roi2Height/2);
 	drawAsterisk(image,leftFeaturePoint,Scalar(0,255,255),2);
 	drawAsterisk(image,rightFeaturePoint,Scalar(0,255,255),2);
 
@@ -334,12 +407,17 @@ void DIP::generateOutImage()
 	Point2i absWeldSeamCenterPoint=0.5*(leftFeaturePoint+rightFeaturePoint);
 	drawAsterisk(image,absWeldSeamCenterPoint,Scalar(255,0,0),2);
 
-	//用蓝色线框标出结构光条纹图像ROI的位置
-	rectangle(image,Point(roiX,roiY),Point(roiX+roiWidth,
-		roiY+roiHeight),Scalar(255,0,0),2,8);
+	//用蓝色线框标出结构光条纹图像ROI1的位置
+	rectangle(image,Point(roiX,roiY),Point(roiX+roi1Width,
+		roiY+roi1Height),Scalar(255,0,0),2,8);
 
-	//用蓝色实线标出焊枪中心位置
-	line(image,Point2i(roiX+roiWidth/2,roiY),Point2i(roiX+roiWidth/2,roiY+roiHeight),Scalar(255,0,0),2,8);
+	//用绿色线框标出结构光条纹图像ROI2的位置
+	rectangle(image,Point(roi2X,roi2Y),Point(roi2X+roi2Width,
+		roi2Y+roi2Height),Scalar(0,255,0),2,8);
+
+	//用蓝色虚线标出焊枪中心位置
+	line(image,Point2i(roi1X+roi1Width/2,roiY),Point2i(roi1X+roi1Width/2,
+		roi1Y+roi1Height),Scalar(255,0,0),2,8);
 	
 	//标示“ROI”字样和焊缝偏差信息
 	String ROITitle="ROI";
@@ -354,8 +432,8 @@ void DIP::generateOutImage()
 	string weldSeamWidthInfo="Seam Width:"+std::to_string((long double)weldSeamWidth)+"pixels";
 	putText(image,weldSeamWidthInfo,Point(20,height-80), FONT_HERSHEY_SIMPLEX,1.5,Scalar(0,0,255),2,8);
 
-	outputImage=image;
-	this->out=DIP::mat2QImage(image);
+	mOutputImage=image;
+	this->qOutputImage=DIP::mat2QImage(image);
 }
 
 
@@ -373,7 +451,7 @@ void DIP::generateOffset()
 {
 	double centerx;
 	centerx=(featurePoints[0].x+featurePoints[1].x)/2;
-	offset=roiWidth/2 - centerx;
+	offset=roi2Width/2 - centerx;
 }
 
 
@@ -419,7 +497,7 @@ Others:
 QImage DIP::mat2QImage(Mat& in)
 {
 	//mat to QImage
-	//QImage out;
+	//QImage qOutputImage;
 	if(in.type()==CV_8UC1)
 	{
 		QImage img((const unsigned char *)(in.data), in.cols, in.rows, in.cols, QImage::Format_Grayscale8); 
@@ -428,15 +506,15 @@ QImage DIP::mat2QImage(Mat& in)
 	else if(in.type()==CV_8UC3)
 	{
 		const uchar *pSrc=(const uchar *)in.data;
-		QImage out(pSrc,in.cols,in.rows,in.step,QImage::Format_RGB888);
-		return out.rgbSwapped();
+		QImage qOutputImage(pSrc,in.cols,in.rows,in.step,QImage::Format_RGB888);
+		return qOutputImage.rgbSwapped();
 	}
 }
 
 
 /*****************************************************************************
-Function:getWeldSeamType
-Description: 
+Function:classify
+Description: 焊缝分类
 Call:
 Called By:
 Input:
@@ -444,9 +522,9 @@ Output:
 Return:
 Others:
 *****************************************************************************/
-void DIP::getWeldSeamType()
+void DIP::classify()
 {
-	seam=BUTT_WELD_SEAM;
+	weldSeamType=BUTT_WELD_SEAM;
 }
 
 /*****************************************************************************
@@ -462,18 +540,18 @@ Others:
 void DIP::processLaserStripeImage()
 {
 	getImageSize();
-	getGrayImage();	//图像处理算法都是基于灰度图
-	getROI(); 
-	getWeldSeamType();	//分类
-	switch(seam)
+	getGrayImage();
+	getROI(); //imwrite("..//images//roi2.tif",roi2);
+	classify();
+	switch(weldSeamType)
 	{
 		case BUTT_WELD_SEAM:
-			filterLaserStripeImage(0);
-			thinLaserStripeImage();	
-			findFeaturePoints();	
+			filter(FILTER_MED_33);
+			thin(INTENSITY_MAXIMUM);	
+			extractFeaturePoints(EXTRACTION_DIFFERENTIAL);	
 			generateOffset();
 			generateOutImage();
-			generateDIPResult();
+			generateWeldSeamInfo();
 			updateLastFrame();
 			break;
 		case LAP_WELD_SEAM:
@@ -484,9 +562,10 @@ void DIP::processLaserStripeImage()
 }
 
 /*****************************************************************************
-Function:filterLaserStripeImage
+Function:filter
 Description: 先对相邻两帧结构光传感图像进行“与”操作，再对结构光条纹图像进行滤波
-Input:method=0---33中值滤波；=1---55中值滤波；=2---15开运算；=3---37开运算
+Input:FILTER_MED_33---33中值滤波；FILTER_MED_55---55中值滤波；
+      FILTER_OPEN_15---15开运算；FILTER_OPEN_37---37开运算
 Call:
 Called By:
 Input:
@@ -494,24 +573,25 @@ Output:
 Return:
 Others:
 *****************************************************************************/
-void DIP::filterLaserStripeImage(int method)
+void DIP::filter(int filterMethod)
 {
-	//比较相邻两幅图像，两者对应像素的最小值作为图像结果
 	Mat lastFrameROI;
-	if(nth!=1)
-	lastFrameROI=lastFrame(Range(roiY,roiY+roiHeight),Range(
-		roiX,roiX+roiWidth));
-	else if(nth==1)
-		lastFrameROI=roi;
+	if(nthFrame!=1)
+	lastFrameROI=lastFrame(Range(DIP::roiY,DIP::roiY+roi1Height),Range(
+		DIP::roiX,DIP::roiX+roi1Width));
+	else if(nthFrame==1)
+		lastFrameROI=roi1;
 
-	roi.copyTo(filteredImage);
-	for(int i=0;i<roiHeight;i++)
+	roi1.copyTo(filteredImage);
+
+	//两帧图像"min"操作
+	for(int i=0;i<roi1Height;i++)
 	{
 		uchar* ptrA=lastFrameROI.ptr<uchar>();
-		uchar* ptrB=roi.ptr<uchar>();
+		uchar* ptrB=roi1.ptr<uchar>();
 		uchar* ptrC=filteredImage.ptr<uchar>();
 
-		for(int j=0;j<roiWidth;j++)
+		for(int j=0;j<roi1Width;j++)
 		{
 			if(ptrA[j]<=ptrB[j])
 				ptrC[j]=ptrA[j];
@@ -520,31 +600,33 @@ void DIP::filterLaserStripeImage(int method)
 		}
 	}
 	
-
 	Mat ele;
-	switch(method)
+	switch(filterMethod)
 	{
-	case 0:
-		medianBlur(roi,filteredImage,3);
+	case FILTER_MED_33:
+		medianBlur(roi1,filteredImage,3);
 		break;
-	case 1:
-		medianBlur(roi,filteredImage,5);
+	case FILTER_MED_55:
+		medianBlur(roi1,filteredImage,5);
 		break;
-	case 2:
+	case FILTER_OPEN_15:
 		ele = getStructuringElement(MORPH_RECT, Size(5, 1));
-		morphologyEx(roi,filteredImage,MORPH_OPEN,ele);
+		morphologyEx(roi1,filteredImage,MORPH_OPEN,ele);
 		break;
-	case 3:
+	case FILTER_OPEN_37:
 		ele = getStructuringElement(MORPH_RECT, Size(7, 3));
-		morphologyEx(roi,filteredImage,MORPH_OPEN,ele);
+		morphologyEx(roi1,filteredImage,MORPH_OPEN,ele);
 		break;
 	}
 
+	filteredImage2=filteredImage(Range(roi1Height/2-roi2Height/2,
+		roi1Height/2+roi2Height/2),Range(0,roi2Width));
+
 }
 
 /*****************************************************************************
-Function:generateDIPResult
-Description: 
+Function:generateWeldSeamInfo
+Description: 计算图像处理的结果，单位：pixel
 Call:
 Called By:
 Input:
@@ -552,17 +634,17 @@ Output:
 Return:
 Others:
 *****************************************************************************/
-void DIP::generateDIPResult()
+void DIP::generateWeldSeamInfo()
 {
-	seaminfo.dWeldSeamOffset=offset;
-	seaminfo.dRemainingHeight=-1;
-	seaminfo.weldSeamType=seam;
-	seaminfo.dWeldSeamWidth=abs(featurePoints[0].x-featurePoints[1].x);
+	seamProfileInfo.dWeldSeamOffset=offset;
+	seamProfileInfo.dRemainingHeight=-1;
+	seamProfileInfo.weldSeamType=weldSeamType;
+	seamProfileInfo.dWeldSeamWidth=abs(featurePoints[0].x-featurePoints[1].x);
 }
 
 /*****************************************************************************
-Function:getROIPosition
-Description: 
+Function:locateROI
+Description: 利用投影法或者ROI图在原图中的位置，包括ROI中心位置和左上角点的位置
 Call:
 Called By:
 Input:
@@ -570,9 +652,11 @@ Output:
 Return:
 Others:
 *****************************************************************************/
-void DIP::getROIPosition(Mat& image,int* ROIX,int* ROIY)
+void DIP::locateROI(Mat& image)
 {
-	*ROIX=image.cols/2-200;
+	//ROI的中心X坐标和原图的中心x重合
+	DIP::roiCenterX=image.cols/2;
+	DIP::roiX=DIP::roiCenterX-DIP::roiWidth/2;
 
 	Mat gray=Mat::zeros(Size(image.cols, image.rows), CV_8UC1);
 	cvtColor(image, gray, CV_BGR2GRAY);
@@ -598,7 +682,8 @@ void DIP::getROIPosition(Mat& image,int* ROIX,int* ROIY)
 		}
 	}
 
-	*ROIY=maxValueAddr-50;
+	DIP::roiCenterY=maxValueAddr;
+	DIP::roiY=DIP::roiCenterY-DIP::roiHeight/2;
 }
 
 /*****************************************************************************
@@ -675,4 +760,20 @@ void DIP::drawAsterisk(Mat& image,Point pt,Scalar& color,int thickness)
 {
 	line(image,Point2i(pt.x-3,pt.y),Point2i(pt.x+3,pt.y),color,thickness);
 	line(image,Point2i(pt.x,pt.y-5),Point2i(pt.x,pt.y+5),color,thickness);
+}
+
+/*****************************************************************************
+Function:setROISize
+Description:设置ROI宽度和高度
+Call:
+Called By:
+Input:
+Output:
+Return:
+Others:
+*****************************************************************************/
+void DIP::setROISize(int width,int height)
+{
+	DIP::roiWidth=width;
+	DIP::roiHeight=height;
 }

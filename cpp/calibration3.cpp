@@ -118,7 +118,7 @@ void FittingCalibration::on_pushButtonCollectValidationData_clicked()
 void FittingCalibration::on_pushButtonCollectSeamLaserStripeData_clicked()
 {
 	ucharCurrentMode=0x04;
-	double dHalfDistance;
+	double dHalfDistance=20;
 	double yVelocity=0.5;	//设定y轴的移动速率为0.5mmps
 	double frameRate=5;
 

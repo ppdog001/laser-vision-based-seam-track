@@ -247,64 +247,45 @@ void Camera::on_pushButtonStopSavingMultipleImages_clicked()
   Return:       
   Others: 
 ******************************************************************************/
-void Camera::initializeCameraConfiguration()
+void Camera::initialize()
 {
-	ui.horizontalSliderGamma->setMaximum(200);
-	ui.horizontalSliderGamma->setMinimum(30);
-	ui.horizontalSliderContrast->setMaximum(2000);
-	ui.horizontalSliderContrast->setMinimum(1);
-	ui.horizontalSliderGain->setMaximum(64);
-	ui.horizontalSliderGain->setMinimum(8);
-	ui.horizontalSliderGamma->setMaximum(200);
-	ui.horizontalSliderGamma->setMinimum(30);
+	//设置horizontalSlider的范围
+	ui.horizontalSliderGamma->setMaximum(20);
+	ui.horizontalSliderGamma->setMinimum(3);
+
+	ui.horizontalSliderContrast->setMaximum(20);
+	ui.horizontalSliderContrast->setMinimum(3);
+
+	ui.horizontalSliderGain->setMaximum(32);
+	ui.horizontalSliderGain->setMinimum(1);
+
+	ui.horizontalSliderExposure->setMaximum(4000);
+	ui.horizontalSliderExposure->setMinimum(1);
 
 	double dGamma;
 	CameraGetGamma(intCameraIndex,&dGamma);
-	ui.labelGamma->setText(QString("%1").arg(dGamma));
-	ui.horizontalSliderGamma->setValue(dGamma*100);
+	ui.labelGammaValue->setText(QString("%1").arg(dGamma));
+	ui.horizontalSliderGamma->setValue(dGamma*10);
 
 	double dContrast;
 	CameraGetContrast(intCameraIndex,&dContrast);
-	ui.labelContrast->setText(QString("%1").arg(dContrast));
+	ui.labelContrastValue->setText(QString("%1").arg(dContrast));
 	ui.horizontalSliderGamma->setValue(dContrast*100);
 
-	bool bAEC,bAGC;
-	CameraGetAGC(intCameraIndex,&bAGC);
-	CameraGetAEC(intCameraIndex,&bAEC);
+	int intGain;
+	CameraGetGain(intCameraIndex,&intGain);
+	ui.labelGainValue->setText(QString("%1").arg(intGain));
+	ui.horizontalSliderGain->setValue(intGain);
 
-	if(bAGC) // bAGC==true
-	{
-		ui.horizontalSliderGain->setEnabled(false);
-		ui.checkBoxGain->setChecked(true);
-	}
-	else //bAGC==true
-	{
-		int gain;
-		CameraGetGain(intCameraIndex,&gain);
-		ui.labelGamma->setText(QString("%1").arg(gain));
-		ui.horizontalSliderGain->setValue(gain);
-		ui.horizontalSliderGain->setEnabled(true);
-	}
-
-	if(bAEC) //bAEC==true
-	{
-		ui.horizontalSliderContrast->setEnabled(false);
-		ui.checkBoxExposure->setChecked(true);
-	}
-	else //bAEC==false
-	{
-		int exposure;
-		CameraGetExposure(intCameraIndex,&exposure);
-		ui.labelExposure->setText(QString("%1").arg(exposure));
-		ui.horizontalSliderContrast->setValue(exposure);
-		ui.horizontalSliderContrast->setEnabled(true);
-		ui.checkBoxExposure->setChecked(false);
-	}
+	int intExposure;
+	CameraGetExposure(intCameraIndex,&intExposure);
+	ui.labelExposureValue->setText(QString("%1").arg(intExposure));
+	ui.horizontalSliderExposure->setValue(intExposure);
 }
 
 /******************************************************************************
   Function:on_horizontalSliderGamma_valueChanged
-  Description: 设置相机gamma值
+  Description: 设置相机gamma值。此相机的gamma值范围是0.3-2.
   Calls: JHCap.h/CameraSetGamma
   Called By: 
   Input:          
@@ -314,15 +295,15 @@ void Camera::initializeCameraConfiguration()
 ******************************************************************************/
 void Camera::on_horizontalSliderGamma_valueChanged(int intGamma)
 {
-	double dGamma=intGamma/100.0;
+	double dGamma=intGamma/10.0;
 	CameraSetGamma(intCameraIndex,dGamma);
 
-	ui.space1->setText(QString("%1").arg(intGamma));
+	ui.labelGammaValue->setText(QString("%1").arg(intGamma));
 }
 
 /******************************************************************************
   Function:on_horizontalSliderContrast_valueChanged
-  Description: 设置相机contrast值
+  Description: 设置相机contrast值,此相机的contrast值范围是0.3-2.
   Calls: JHCap.h/CameraSetContrast
   Called By: 
   Input:          
@@ -332,15 +313,15 @@ void Camera::on_horizontalSliderGamma_valueChanged(int intGamma)
 ******************************************************************************/
 void Camera::on_horizontalSliderContrast_valueChanged(int intContrastValue)
 {
-	double dContrast=intContrastValue/100.0;
+	double dContrast=intContrastValue/10.0;
 	CameraSetContrast(intCameraIndex,dContrast);
 
-	ui.space2->setText(QString("%1").arg(intContrastValue));
+	ui.labelContrastValue->setText(QString("%1").arg(intContrastValue));
 }
 
 /******************************************************************************
   Function:on_horizontalSliderGain_valueChanged
-  Description: 设置相机gain值
+  Description: 设置相机gain值.增益范围为1-255，相机手册上建议是小于32
   Calls: JHCap.h/CameraSetGain
   Called By: 
   Input:          
@@ -351,12 +332,12 @@ void Camera::on_horizontalSliderContrast_valueChanged(int intContrastValue)
 void Camera::on_horizontalSliderGain_valueChanged(int intGainValue)
 {
 	CameraSetGain(intCameraIndex,intGainValue);
-	ui.space3->setText(QString("%1").arg(intGainValue));
+	ui.labelGainValue->setText(QString("%1").arg(intGainValue));
 }
 
 /******************************************************************************
   Function:on_exposureHS_valueChanged
-  Description: 设置相机曝光值
+  Description: 设置相机曝光值，增益范围为1-4000
   Calls: JHCap.h/CameraSetExposure
   Called By: 
   Input:          
@@ -367,7 +348,7 @@ void Camera::on_horizontalSliderGain_valueChanged(int intGainValue)
 void Camera::on_horizontalSliderExposure_valueChanged(int intExposureValue)
 {
 	CameraSetExposure(intCameraIndex,intExposureValue);
-	ui.space4->setText(QString("%1").arg(intExposureValue));
+	ui.labelExposureValue->setText(QString("%1").arg(intExposureValue));
 }
 
 /******************************************************************************
@@ -383,7 +364,22 @@ void Camera::on_horizontalSliderExposure_valueChanged(int intExposureValue)
 void Camera::on_checkBoxGain_toggled(bool checked)
 {
 	CameraSetAGC(intCameraIndex,checked);
-	initializeCameraConfiguration();
+
+	CameraGetAGC(intCameraIndex,&bAGC);
+	if(bAGC)//相机已开启自动增益
+	{
+		ui.horizontalSliderGain->setEnabled(false);
+		ui.checkBoxGain->setChecked(true);
+	}
+	else //相机关闭自动增益
+	{
+		int gain;
+		CameraGetGain(intCameraIndex,&gain);
+		ui.labelGammaValue->setText(QString("%1").arg(gain));
+		ui.horizontalSliderGain->setEnabled(true);
+		ui.horizontalSliderGain->setValue(gain);
+	}
+	
 }
 
 /******************************************************************************
@@ -399,5 +395,19 @@ void Camera::on_checkBoxGain_toggled(bool checked)
 void Camera::on_checkBoxExposure_toggled(bool checked)
 {
 	CameraSetAEC(intCameraIndex,checked);
-	initializeCameraConfiguration();
+	
+	CameraGetAEC(intCameraIndex,&bAEC);
+	if(bAEC)//相机已开启自动曝光
+	{
+		ui.horizontalSliderExposure->setEnabled(false);
+		ui.checkBoxExposure->setChecked(true);
+	}
+	else //相机关闭自动曝光
+	{
+		int exposure;
+		CameraGetExposure(intCameraIndex,&exposure);
+		ui.labelExposureValue->setText(QString("%1").arg(exposure));
+		ui.horizontalSliderExposure->setEnabled(true);
+		ui.horizontalSliderExposure->setValue(exposure);
+	}
 }

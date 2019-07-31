@@ -5,14 +5,20 @@
               定义了SeamTrackingSys类，此类继承于QWidget，负责交易校正的所有功能
   Others: 
   Function List:
-                1. SimpleCalibration	// 类初始化
-                2. ~SimpleCalibration	// 类析构时
-	            3. on_confirmPushButton_clicked // 计算rho--即水平标定比率
-	            4. updateHorizontalCalibrationRatio_triggered 
-	            
+                SimpleCalibration	// 类初始化
+                ~SimpleCalibration	// 类析构时
+				receiveBlockWidthPixel
+				setDefaultConfiguration
+
+				getBlockWidthPixel_triggered
+				on_pushButtonGetBlockWidthPixel_triggered
+				on_pushButtonCalculate_clicked 
+				updateHorizontalCalibrationRatio_triggered
+	            updateCalibrationState_triggered
   History: 
           <author>		<time>       <desc>
            WillLi99    2019-5-18     添加calbraiton1.h头部注释
+		   WillLi99    2019-7-11     修改了calibration1.ui文件，并增加了相应的功能
 ******************************************************************************/
 
 #pragma once
@@ -21,8 +27,6 @@
 
 #include "qwidget.h"
 #include "ui_calibration1.h"
-
-extern bool hasCalibrated;
 
 class SimpleCalibration :
 	public QWidget
@@ -34,11 +38,18 @@ public:
 private:
 	Ui_Calibration1 ui;
 	double dHorizontalCalibrationRatio;
+	double dBlockWidthPixel;
+	double dBlockWidthmm;
+	
+	void setDefaultConfiguration();
 private slots:
-	void on_pushButtonConfirm_clicked();
+	void on_pushButtonCalculate_clicked();
+	void on_pushButtonGetBlockWidtPixel_clicked();
+	void receiveBlockWidthPixel(double blockWidth);
 signals:
-	void updateHorizontalCalibrationRatio_triggered(double hcr);
+	void updateHorizontalCalibrationRatio_triggered(double horizontalCalibratinRate);
 	void updateCalibrationState_triggered();
+	void getBlockWidthPixel_triggered();
 };
 
 #endif

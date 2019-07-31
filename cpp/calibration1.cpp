@@ -4,17 +4,23 @@
   Description:
 	          SimpleCalibration类的的实现
   Function List:
-                1. SimpleCalibration	// 类初始化
-                2. ~SimpleCalibration	// 类析构时
-                3. on_confirmPushButton_clicked // 计算rho--即水平标定比率
-                4. updateHorizontalCalibrationRatio_triggered
+				SimpleCalibration	// 类初始化
+  				~SimpleCalibration	// 类析构时
+  				receiveBlockWidthPixel
+  				setDefaultConfiguration
+
+  				getBlockWidthPixel_triggered
+  				on_pushButtonGetBlockWidthPixel_triggered
+  				on_pushButtonCalculate_clicked 
+  				updateHorizontalCalibrationRatio_triggered
+  				updateCalibrationState_triggered
   History:
          <author>		<time>     <desc>
           WillLi99    2019-5-18     添加clibration.cpp头部注释和各函数的头部注释  
 ******************************************************************************/
 
 #include "calibration1.h"
-#include "var.h"
+#include "common.h"
 
 
 /******************************************************************************
@@ -30,6 +36,7 @@
 SimpleCalibration::SimpleCalibration(QWidget *parent)
 {
 	ui.setupUi(this);
+	setDefaultConfiguration();
 }
 
 /******************************************************************************
@@ -56,39 +63,84 @@ SimpleCalibration::~SimpleCalibration(void)
   Return:       
   Others: 
 ******************************************************************************/
-void SimpleCalibration::on_pushButtonConfirm_clicked()
+void SimpleCalibration::on_pushButtonCalculate_clicked()
 {
-	QString aswString,pswString;
-	double asw,psw;
-	aswString=ui.lineEditRealCalibrationBlockWidth->text();
-	pswString=ui.lineEditPhotographicBlockWidth->text();
+	dHorizontalCalibrationRatio=dBlockWidthmm/dBlockWidthPixel;
 
-	//检测kString和bString是否合法
-	asw=aswString.toDouble();
-	psw=pswString.toDouble();
+	ui.lineEditBlockWidthPixel->setText(QString::number(dBlockWidthPixel));
+	ui.lineEditHorizontalCalibrationRatio->setText(QString::number(dHorizontalCalibrationRatio));
 
-	if(0==asw)
-	{
-		QMessageBox msgbox;
-		msgbox.setWindowTitle(QStringLiteral("提示"));
-		msgbox.setText(QStringLiteral("输入非法，请更正！"));
-		msgbox.exec();
-		return;
-	}
-	
-	if(0==psw)
-	{
-		QMessageBox msgbox;
-		msgbox.setWindowTitle(QStringLiteral("提示"));
-		msgbox.setText(QStringLiteral("输入非法，请更正！"));
-		msgbox.exec();
-		return;
-	}
-
-	dHorizontalCalibrationRatio=asw/psw;
-	qDebug()<<"horizontalCalibrationRatio from simple calibration is "<<dHorizontalCalibrationRatio;
 	emit updateHorizontalCalibrationRatio_triggered(dHorizontalCalibrationRatio);
-	emit updateCalibrationState_triggered();;
+	emit updateCalibrationState_triggered();
+}
 
-	close();
+/******************************************************************************
+  Function:on_pushButtonGetBlockWidtPixel_clicked
+  Description: 发送指令给tracksys.cpp，令其通过qt通信，返回标定块的像素值
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void SimpleCalibration::on_pushButtonGetBlockWidtPixel_clicked()
+{
+	QString sBlockWidth=ui.lineEditBlockWidth->text();
+	bool bConversionState;
+	double dBlockWidth=sBlockWidth.toDouble(&bConversionState);
+
+	if(bConversionState)
+	{
+		dBlockWidthmm=dBlockWidth;
+	}
+	else
+	{
+		dBlockWidthmm=10.0;
+		ui.lineEditBlockWidth->setText(QString::number(dBlockWidthmm));
+
+		QMessageBox msg;
+		msg.setText(QStringLiteral("数据输入错误！已设置为默认"));
+		msg.exec();
+
+		return;
+	}
+	emit getBlockWidthPixel_triggered();
+}
+
+
+/******************************************************************************
+  Function:receiveBlockWidth
+  Description: 接受tracksys.cpp发过来的blockWidth
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void SimpleCalibration::receiveBlockWidthPixel(double blockWidth)
+{
+	dBlockWidthPixel=blockWidth;
+}
+
+/******************************************************************************
+  Function:setDefaultConfiguration
+  Description: 设置默认的标定块（block)宽度为10mm
+  Calls: 
+  Called By: 
+  Input:          
+  Output: 
+  Return:       
+  Others: 
+******************************************************************************/
+void SimpleCalibration::setDefaultConfiguration()
+{
+	dBlockWidthmm=10.0;
+	dHorizontalCalibrationRatio=0.0;
+	dBlockWidthPixel=0.0;
+
+	ui.lineEditBlockWidth->setText(QString::number(dBlockWidthmm));
+	ui.lineEditHorizontalCalibrationRatio->setText(QString::number(dHorizontalCalibrationRatio));
+	ui.lineEditBlockWidthPixel->setText(QString::number(dBlockWidthPixel));
 }

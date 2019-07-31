@@ -28,7 +28,7 @@
 #pragma once
 #ifndef Calibration3_H
 #define Calibration3_H
-#include "var.h"
+#include "common.h"
 #include "ui_calibration3.h"
 #include "motion.h"
 

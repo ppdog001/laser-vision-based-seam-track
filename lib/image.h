@@ -21,7 +21,7 @@
 #ifndef _IMAGE_H
 #define _IMAGE_H
 
-#include "var.h"
+#include "common.h"
 
 extern bool g_isCameraWorking;
 

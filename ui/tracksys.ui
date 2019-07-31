@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1018</width>
+    <width>1012</width>
     <height>710</height>
    </rect>
   </property>
@@ -34,7 +34,7 @@
      <pointsize>10</pointsize>
     </font>
    </property>
-   <widget class="QPushButton" name="quitPushButton">
+   <widget class="QPushButton" name="pushButtonQuit">
     <property name="geometry">
      <rect>
       <x>530</x>
@@ -80,9 +80,9 @@
        <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutNo3">
+     <layout class="QVBoxLayout" name="verticalLayout3">
       <item>
-       <widget class="QLabel" name="weldSpeedLabel">
+       <widget class="QLabel" name="labelWeldSpeed">
         <property name="text">
          <string>焊接速度：</string>
         </property>
@@ -92,7 +92,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="weldVoltageLabel">
+       <widget class="QLabel" name="labelWeldVoltage">
         <property name="text">
          <string>焊接电压：</string>
         </property>
@@ -102,7 +102,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="weldCurrentLabel">
+       <widget class="QLabel" name="labelWeldCurrent">
         <property name="text">
          <string>焊接电流：</string>
         </property>
@@ -112,7 +112,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="gasFlowLabel">
+       <widget class="QLabel" name="labelGasFlow">
         <property name="text">
          <string>气体流量：</string>
         </property>
@@ -122,7 +122,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="gasPressureLabel">
+       <widget class="QLabel" name="labelGasPressure">
         <property name="text">
          <string>气体压力：</string>
         </property>
@@ -132,7 +132,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="wireFeedRateLabel">
+       <widget class="QLabel" name="labelWireRate">
         <property name="text">
          <string>送丝速度：</string>
         </property>
@@ -152,9 +152,9 @@
        <height>171</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutNo2">
+     <layout class="QVBoxLayout" name="verticalLayout2">
       <item>
-       <widget class="QLabel" name="seamTypeLabel">
+       <widget class="QLabel" name="labelSeamType">
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
@@ -170,7 +170,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="seamWidthLabel">
+       <widget class="QLabel" name="labelSeamWidth">
         <property name="text">
          <string>焊缝宽度：</string>
         </property>
@@ -180,7 +180,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="seamOffsetLabel">
+       <widget class="QLabel" name="labelSeamOffset">
         <property name="text">
          <string>焊缝偏差：</string>
         </property>
@@ -190,7 +190,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="seamRemainingHeightLabel">
+       <widget class="QLabel" name="labelSeamRemainingHeight">
         <property name="text">
          <string>焊缝余高：</string>
         </property>
@@ -200,7 +200,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="horizontalCalibrationRatioLabel">
+       <widget class="QLabel" name="labelHorizontalCalibrationRatio">
         <property name="text">
          <string>水平标定比值：</string>
         </property>
@@ -210,7 +210,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="verticalCalibrationLabel">
+       <widget class="QLabel" name="labelVerticalCalibrationRation">
         <property name="text">
          <string>垂直标定比值：</string>
         </property>
@@ -230,9 +230,9 @@
        <height>91</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutNo1">
+     <layout class="QVBoxLayout" name="verticalLayout1">
       <item>
-       <widget class="QLabel" name="controlcardStateLabel">
+       <widget class="QLabel" name="labelControlcardState">
         <property name="text">
          <string>控制卡状态：</string>
         </property>
@@ -242,7 +242,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="cameraStateLabel">
+       <widget class="QLabel" name="labelCameraState">
         <property name="text">
          <string>相机状态：</string>
         </property>
@@ -252,7 +252,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="cameraResolution">
+       <widget class="QLabel" name="labelCameraResolution">
         <property name="text">
          <string>相机分辨率：</string>
         </property>
@@ -272,7 +272,7 @@
        <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutNo8">
+     <layout class="QVBoxLayout" name="verticalLayout8">
       <item>
        <widget class="QLabel" name="unitLabel6">
         <property name="font">
@@ -356,7 +356,7 @@
        <height>271</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutNo7">
+     <layout class="QVBoxLayout" name="verticalLayout7">
       <item>
        <widget class="QLabel" name="weldSpeedDisplayLabel">
         <property name="font">
@@ -515,7 +515,7 @@
        <height>171</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutNo6">
+     <layout class="QVBoxLayout" name="verticalLayout6">
       <item>
        <widget class="QLabel" name="unitLabel0">
         <property name="font">
@@ -596,16 +596,16 @@
        <x>130</x>
        <y>120</y>
        <width>68</width>
-       <height>182</height>
+       <height>171</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutNo5">
+     <layout class="QVBoxLayout" name="verticalLayout5">
       <item>
-       <widget class="QLabel" name="seamTypeDisplayLabel">
+       <widget class="QLabel" name="label_seamType">
         <property name="font">
          <font>
           <family>微软雅黑</family>
-          <pointsize>14</pointsize>
+          <pointsize>8</pointsize>
           <weight>50</weight>
           <bold>false</bold>
          </font>
@@ -631,7 +631,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="seamWidthDisplayLabel">
+       <widget class="QLabel" name="label_seamWidth">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -656,7 +656,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="seamOffsetDisplayLabel">
+       <widget class="QLabel" name="label_seamOffset">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -681,7 +681,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="seamRemainingHeightDisplayLabel">
+       <widget class="QLabel" name="label_seamRemainingHeight">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -706,7 +706,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="horizontalCalibrationRatioDisplayLabel">
+       <widget class="QLabel" name="label_horizontalCalibrationRatio">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -731,7 +731,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="verticalCalibrationDisplayLaebl">
+       <widget class="QLabel" name="label_verticalCalibrationRatio">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -768,7 +768,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayoutNo4">
       <item>
-       <widget class="QLabel" name="cardStateDisplayLabel">
+       <widget class="QLabel" name="label_cardState">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -795,7 +795,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="cameraStateDisplayLabel">
+       <widget class="QLabel" name="label_cameraState">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -819,7 +819,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="cameraResolutionDisplayLabel">
+       <widget class="QLabel" name="label_cameraResolution">
         <property name="font">
          <font>
           <family>微软雅黑</family>
@@ -864,7 +864,7 @@
     <property name="flat">
      <bool>false</bool>
     </property>
-    <widget class="QPushButton" name="setWeldParametersPushButton">
+    <widget class="QPushButton" name="pushButtonSetWeldParameters">
      <property name="geometry">
       <rect>
        <x>340</x>
@@ -892,7 +892,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QLabel" name="autoWeldingSwitchLabel">
+     <widget class="QLabel" name="labelAutoWeldSwitch">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -905,7 +905,7 @@
        <string>保护气、自动送丝、焊接电弧</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="switchOnRadioButton">
+     <widget class="QRadioButton" name="RadioButtonSwitchOn">
       <property name="geometry">
        <rect>
         <x>210</x>
@@ -918,7 +918,7 @@
        <string>开</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="switchOffRadioButton">
+     <widget class="QRadioButton" name="radioButtonSwitchOff">
       <property name="geometry">
        <rect>
         <x>260</x>
@@ -951,7 +951,7 @@
     <property name="flat">
      <bool>false</bool>
     </property>
-    <widget class="QPushButton" name="turnOnCameraPushButton">
+    <widget class="QPushButton" name="pushButtonTurnOnCamera">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -967,7 +967,7 @@
       <string>Ctrl+J</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="turnOffCameraPushButton">
+    <widget class="QPushButton" name="pushButtonTurnOffCamera">
      <property name="geometry">
       <rect>
        <x>130</x>
@@ -983,7 +983,7 @@
       <string>Ctrl+K</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="cameraParametersSettingPushButton">
+    <widget class="QPushButton" name="pushButtonCameraParametersSetting">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -999,7 +999,7 @@
       <string>Ctrl+P</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="cameraResolutionComBox">
+    <widget class="QComboBox" name="comboxCameraResolution">
      <property name="geometry">
       <rect>
        <x>150</x>
@@ -1028,7 +1028,7 @@
     <property name="flat">
      <bool>false</bool>
     </property>
-    <widget class="QPushButton" name="turnOnRecognitionPushButton">
+    <widget class="QPushButton" name="pushButtonTurnOnRecognition">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -1044,7 +1044,7 @@
       <string>Ctrl+U</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="turnOffRecognitonPushButton">
+    <widget class="QPushButton" name="pushButtonTurnOffRecognition">
      <property name="geometry">
       <rect>
        <x>120</x>
@@ -1060,7 +1060,7 @@
       <string>Ctrl+I</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="loadTestingDataSetsPushButton">
+    <widget class="QPushButton" name="pushButtonLoadTestData">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -1070,10 +1070,10 @@
       </rect>
      </property>
      <property name="text">
-      <string>Load</string>
+      <string>加载测试数据</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="unloadTestingDataSetsPushButton">
+    <widget class="QPushButton" name="pushButtonUnloadTestDataSets">
      <property name="geometry">
       <rect>
        <x>120</x>
@@ -1083,62 +1083,9 @@
       </rect>
      </property>
      <property name="text">
-      <string>Unload</string>
+      <string>卸载测试数据</string>
      </property>
     </widget>
-   </widget>
-   <widget class="QLabel" name="videoTypeLabel1">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>71</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>微软雅黑</family>
-      <pointsize>11</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgba(255, 255, 255, 30%);</string>
-    </property>
-    <property name="text">
-     <string>原始视频</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-   </widget>
-   <widget class="QLabel" name="videoTypeLabel2">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>10</y>
-      <width>71</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>微软雅黑</family>
-      <pointsize>11</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">color: rgba(255, 255, 255, 30%);</string>
-    </property>
-    <property name="text">
-     <string>ROI</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
    </widget>
    <widget class="QGraphicsView" name="video0GraphicsView">
     <property name="geometry">
@@ -1166,7 +1113,7 @@
      <string notr="true">background-color: black</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="alignPushButton">
+   <widget class="QPushButton" name="pushButtonAlign">
     <property name="geometry">
      <rect>
       <x>530</x>
@@ -1185,7 +1132,7 @@
      <string>Ctrl+C</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="startAutoTrackPushButton">
+   <widget class="QPushButton" name="pushButtonStartAutoTrack">
     <property name="geometry">
      <rect>
       <x>780</x>
@@ -1204,7 +1151,7 @@
      <string>Ctrl+A</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="stopAutoTrackPushButton">
+   <widget class="QPushButton" name="pushButtonStopAutoTrack">
     <property name="geometry">
      <rect>
       <x>530</x>
@@ -1223,7 +1170,7 @@
      <string>Ctrl+Shift+Space</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="manualControlPushButton">
+   <widget class="QPushButton" name="pushButtonManualControl">
     <property name="geometry">
      <rect>
       <x>780</x>
@@ -1248,7 +1195,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1018</width>
+     <width>1012</width>
      <height>23</height>
     </rect>
    </property>
@@ -1256,14 +1203,16 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="actionclose"/>
+    <addaction name="actionClose"/>
    </widget>
-   <widget class="QMenu" name="trackModeMenu">
+   <widget class="QMenu" name="trackMethodMenu">
     <property name="title">
      <string>跟踪模式</string>
     </property>
-    <addaction name="actionOnlineTrack"/>
-    <addaction name="actionOfflineTrack"/>
+    <addaction name="actionTrackMethod1"/>
+    <addaction name="actionTrackMethod2"/>
+    <addaction name="actionTrackMethod3"/>
+    <addaction name="actionTrackMethod4"/>
    </widget>
    <widget class="QMenu" name="accelerationModeMenu">
     <property name="title">
@@ -1283,12 +1232,12 @@
     <property name="title">
      <string>校正</string>
     </property>
-    <addaction name="actionCalibrationMethod1"/>
-    <addaction name="actionCalibrationMethod2"/>
-    <addaction name="actionCalibrationMethod3"/>
+    <addaction name="actionCalibration1"/>
+    <addaction name="actionCalibration2"/>
+    <addaction name="actionCalibration3"/>
    </widget>
    <addaction name="fileMenu"/>
-   <addaction name="trackModeMenu"/>
+   <addaction name="trackMethodMenu"/>
    <addaction name="accelerationModeMenu"/>
    <addaction name="calibrationMenu"/>
    <addaction name="helpMenu"/>
@@ -1302,25 +1251,25 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionclose">
+  <action name="actionClose">
    <property name="text">
     <string>退出</string>
    </property>
   </action>
-  <action name="actionOnlineTrack">
+  <action name="actionTrackMethod1">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
-    <string>在线</string>
+    <string>跟踪方法一（参考法）</string>
    </property>
   </action>
-  <action name="actionOfflineTrack">
+  <action name="actionTrackMethod2">
    <property name="text">
-    <string>离线</string>
+    <string>跟踪方法二（全局坐标法）</string>
    </property>
    <property name="iconText">
     <string>离线</string>
@@ -1386,19 +1335,29 @@
     <string>普通</string>
    </property>
   </action>
-  <action name="actionCalibrationMethod1">
+  <action name="actionCalibration1">
    <property name="text">
     <string>校正方式1（简单校正）</string>
    </property>
   </action>
-  <action name="actionCalibrationMethod2">
+  <action name="actionCalibration2">
    <property name="text">
     <string>校正方式2（齿耙校正）</string>
    </property>
   </action>
-  <action name="actionCalibrationMethod3">
+  <action name="actionCalibration3">
    <property name="text">
     <string>校正方式3（拟合校正）</string>
+   </property>
+  </action>
+  <action name="actionTrackMethod3">
+   <property name="text">
+    <string>跟踪方法三（参考法+卡尔曼滤波）</string>
+   </property>
+  </action>
+  <action name="actionTrackMethod4">
+   <property name="text">
+    <string>跟踪方法四（全局坐标法+卡尔曼滤波）</string>
    </property>
   </action>
  </widget>

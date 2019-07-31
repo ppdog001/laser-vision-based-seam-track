@@ -10,8 +10,9 @@
                  ~SeamTrackingSys	// 类析构时，释放资源
 	             setDefaultUiConfiguration // 设置默认的菜单配置
 	             initializeVariable //初始化类的私有变量
-	             on_turnOnCameraPushButton_clicked	// 开相机
-	             on_turnOffCameraPushButton_clicked	// 关相机
+				 setReferenceOffset	//设定参考偏差
+	             on_pushButtonTurnOnCamera_clicked	// 开相机
+	             on_pushButtonTurnOffCamera_clicked	// 关相机
 	             loadDefaultCameraConfiguration	// 加载相机的默认配置
 	             updateCameraConnectionState // 更新相机连接情况
 	             on_cameraResolutionComBox_currentIndexChanged	// 改变分辨率
@@ -21,7 +22,7 @@
 	             saveCalibrationData	// 保存拟合校正图像
 	             saveValidationData	// 保存拟合校正做精度验证的图像
 	             saveSeamLaserStripeData	// 保存激光条纹图像
-	             on_cameraParametersSettingPushButton_clicked	// 弹出camera界面
+	             on_pushButtonCameraParametersSetting_clicked	// 弹出camera界面
 	             updateFPSValue	// 更新相机FPS
 	             saveSingleImage	// 保存单张图片
 	             saveMultiImages // 连续地保存图像
@@ -32,24 +33,22 @@
 	             updateDIPCalculationResult // 更新图像处理的计算结果
 	             updateHorizontalCalibrationRatio	// 更新水平标定比率
 	             updateSeamType // 更新焊缝分类结果
-	             on_loadTestingDataSetsPushButton_clicked	// 打开测试数据集
+	             on_pushButtonLoadTestData_clicked	// 打开测试数据集
 	             on_unloadTestingDataSetPushButton_clicked	// 关闭测试数据集
-	             on_quitPushButton_clicked	// 释放相机资源、释放控制卡
-	             on_turnOnRecognitionPushButton_clicked	// 开图像识别功能
-	             on_turnOffRecognitonPushButton_clicked	// 关图像识别功能
+	             on_pushButtonQuit_clicked	// 释放相机资源、释放控制卡
+	             on_pushButtonTurnOnRecognition_clicked	// 开图像识别功能
+	             on_pushButtonTurnOffRecognition_clicked	// 关图像识别功能
 	             updateMotionControllerConnectionState	// 更新控制卡连接情况
 	             on_actiontrapezoidal_triggered // 设置运动加速为S型加速
 	             on_actionsigmoid_triggered	// 设置运动加速为梯形加速
-	             on_manualControlPushButton_clicked	// 手动控制
-	             on_alignPushButton_clicked	// 将图像视野中间对准焊缝中心
-	             on_startAutoTrackPushButton_clicked	// 启动自动跟踪
-	             on_stopAutoTrackPushButton_clicked	// 停止自动跟踪的过程
+	             on_pushButtonManualControl_clicked	// 手动控制
+	             on_pushButtonAlign_clicked	// 将图像视野中间对准焊缝中心
+	             on_pushButtonStartAutoTrack_clicked	// 启动自动跟踪
+	             on_pushButtonStopAutoTrack_clicked	// 停止自动跟踪的过程
 	             setDefaultWeldParameters	// 设置默认的焊接图像
 	             updateWeldParameters	// 更新焊接参数
-	             on_setWeldParametersPushButton_clicked	// 设置焊接参数
+	             on_pushButtonSetWeldParameters_clicked	// 设置焊接参数
 	             closeEvent	// 关闭窗口事件
-	             on_actionOfflineTrack_triggered	// 离线焊接
-	             on_actionOnlineTrack_triggered	// 在线焊接
 	             on_actionabout_triggered // 弹出“关于”信息
 	             on_actionCalibrationMethod1_triggered	// 进行标定方法1-简易标定
 	             on_actionCalibrationMethod2_triggered	// 进行标定方法2-齿耙标定
@@ -67,6 +66,9 @@
           <author>		<time>       <desc>
            WillLi99    2019-5-18     添加tracksys.h头部注释
 		   WillLi99    2019-5-19	将testorNot全局变量去掉
+		   WillLi99    2019-6-12    添加setReferenceOffset函数
+		   Will99	  2019-7-8      删除了actionOnlineTrack和actionOfflineTrack相关内容
+		                            增加了trackMethodMenu内容
 ******************************************************************************/
 
 #pragma once
@@ -81,7 +83,7 @@
 #include "weld.h"
 #include "onlinetrack.h"
 #include "dip.h"
-#include "var.h"
+#include "common.h"
 #include "offlinetrack.h"
 #include "calibration3.h"
 
@@ -125,36 +127,38 @@ private:
 
 // normal variables
 private:
-	int cameraIndex;//相机索引号
-	int cardCount; 
+	int intCameraIndex;//相机索引号
+	int intCardCount; 
 
 	QImage frame;
 
-	int imageWidth;
-	int imageHeight;
+	int intImageWidth;
+	int intImageHeight;
 
-	double fpsValue;
-	int m_totalFrame;
+	double dFpsValue;
+	int intTotalFrame;
 	
-	int multiImagesNo;
-	QString multiImagesFilePath;
-	QString multiImagesName;
+	int intMultipleImagesNo;
+	QString qsMultipleImagesFilePath;
+	QString qsMultipleImagesName;
 
-	double horizontalCalibrationRatio;
-	double currentSeamOffset;
-	double lastSeamOffset;
+	double dHorizontalCalibrationRatio;
+	double dReferenceOffset;
+	double dCurrentOffset;
 
-	WeldParameter weldparameter;		//焊接参数
-	SeamTrackParameter seamtrackparameter;	//跟踪参数
+	WeldParameter wpWeldParameter;
+	SeamTrackParameter spSeamTrackParameter;
+	SeamInfo siSeamInfo;
 	
-	LONG64 receivedFrameNumber;
+	LONG64 longReceivedFrameNumber;
 
-	SeamType weldSeamType;
+	SeamType stWeldSeamType;
 
 	QImage checkico;
 	QImage wrongico;
 	QImage unknownico;
 
+	int intTrackMethod;
 // 开关、标志类
 private:
 	bool isCameraConnected;	
@@ -174,37 +178,40 @@ private:
 // 普通私有函数
 private:
 	void initializeVariable();
-
+	void setReferenceOffset();
+	void setDefaultSeamTrackParameters();
 // slots
 private slots:
 	
 	// pushbutton-related
-	void on_quitPushButton_clicked();
-	void on_startAutoTrackPushButton_clicked();
-	void on_stopAutoTrackPushButton_clicked();
-	void on_alignPushButton_clicked();
-	void on_turnOnCameraPushButton_clicked();
-	void on_turnOffCameraPushButton_clicked();
-	void on_turnOnRecognitionPushButton_clicked();
-	void on_turnOffRecognitonPushButton_clicked();
-	void on_loadTestingDataSetsPushButton_clicked();
-	void on_unloadTestingDataSetsPushButton_clicked();
-	void on_cameraParametersSettingPushButton_clicked();
-	void on_manualControlPushButton_clicked();
-	void on_setWeldParametersPushButton_clicked();
+	void on_pushButtonQuit_clicked();
+	void on_pushButtonStartAutoTrack_clicked();
+	void on_pushButtonStopAutoTrack_clicked();
+	void on_pushButtonAlign_clicked();
+	void on_pushButtonTurnOnCamera_clicked();
+	void on_pushButtonTurnOffCamera_clicked();
+	void on_pushButtonTurnOnRecognition_clicked();
+	void on_pushButtonTurnOffRecognition_clicked();
+	void on_pushButtonLoadTestData_clicked();
+	void on_pushButtonUnloadTestDataSets_clicked();
+	void on_pushButtonCameraParametersSetting_clicked();
+	void on_pushButtonManualControl_clicked();
+	void on_pushButtonSetWeldParameters_clicked();
 
 	// combox-related
-	void on_cameraResolutionComBox_currentIndexChanged(int index);
+	void on_comboxCameraResolution_currentIndexChanged(int index);
 	
 	// munu_related
-	void on_actionOnlineTrack_triggered();
-	void on_actionOfflineTrack_triggered();
+	void on_actionTrackMethod1_triggered();
+	void on_actionTrackMethod2_triggered();
+	void on_actionTrackMethod3_triggered();
+	void on_actionTrackMethod4_triggered();
 	void on_actionTrapezoidal_triggered();
 	void on_actionSigmoid_triggered();
 	void on_actionAbout_triggered();
-	void on_actionCalibrationMethod1_triggered();
-	void on_actionCalibrationMethod2_triggered();
-	void on_actionCalibrationMethod3_triggered();
+	void on_actionCalibration1_triggered();
+	void on_actionCalibration2_triggered();
+	void on_actionCalibration3_triggered();
 	
 	// self-defining
 	void display1(QImage img, unsigned char* buffer);
@@ -217,9 +224,9 @@ private slots:
 	
 	void updateDIPResult(QImage image);
 	void updateDIPCalculationResult(SeamInfo seaminfo);
-	void updateHorizontalCalibrationRatio(double ratio);
-
-	void updateWeldParameters(WeldParameter paramters);
+	void syncHorizontalCalibrationRatio(double horizontalCalibrationRate);
+	void syncWeldParameters(WeldParameter parameters);
+	void syncSeamTrackParameters(SeamTrackParameter parameters);
 	
 	void saveImageOfflineTrack(QString fileName);
 
@@ -236,7 +243,8 @@ private slots:
 	void setDefaultUiConfiguration();
 	void setDefaultWeldParameters();
 	void loadDefaultCameraConfiguration();
-	void updateCalibrationState();
+	void syncCalibrationState();
+	void sendBlockWidthPixel();
 
 // 信号
 signals:
@@ -248,4 +256,7 @@ signals:
 	void updateWeldParameters_triggered(WeldParameter parameters);
 	void triggerTestingMode_triggered();
 	void detriggerTestingMode_triggered();
+	void sendReferenceOffset_triggered(double dReferenceOffset);
+	void updateTrackMethod_triggered(int intTrackMethod);
+	void sendBlockWidthPixel_triggered(double dBlockWidthPixel);
 };

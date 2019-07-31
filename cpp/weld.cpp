@@ -7,8 +7,8 @@
   Function List:
              Weld
 			 ~Weld
-			 on_confirmPushButton_clicked	//检查焊接参数合法性，无误后传给mainwindow
-			 on_cancelPushButton_clicked	//退出界面
+			 on_pushButtonConfirm_clicked	//检查焊接参数合法性，无误后传给mainwindow
+			 on_pushButtonCancel_clicked	//退出界面
 			 setDefaultParameters			//设置默认的焊接参数
 			 checkParameters				//检测填入lineEdit的参数是否合理
 
@@ -159,11 +159,15 @@ bool Weld::checkWeldParameters()
 	wpWeldParameter.dWeldCurrent=dWeldCurrent;
 	wpWeldParameter.dWeldDistance=dWeldDistance;
 
+	spSeamTrackParameter.trackingDistance=dWeldDistance;
+	spSeamTrackParameter.trackingVelocity=dWeldSpeed;
+	spSeamTrackParameter.trackingDirection=1;
+
 	return true;
 }
 
 /******************************************************************************
-  Function:on_confirmPushButton_clicked
+  Function:on_pushButtonConfirm_clicked
   Description:
   Calls: 
   Called By:
@@ -172,13 +176,14 @@ bool Weld::checkWeldParameters()
   Return:       
   Others: 
 ******************************************************************************/
-void Weld::on_confirmPushButton_clicked()
+void Weld::on_pushButtonConfirm_clicked()
 {
 	bool checkResult=checkWeldParameters();
 	
 	if(checkResult==true)	//检查通过，emit焊接参数
 	{
 		emit updateWeldParameters_triggered(wpWeldParameter);
+		emit updateSeamTrackParameters_triggerd(spSeamTrackParameter);
 		close();
 	}
 	else if(checkResult==false)
@@ -188,7 +193,7 @@ void Weld::on_confirmPushButton_clicked()
 }
 
 /******************************************************************************
-  Function:on_cancelPushButton_clicked
+  Function:on_pushButtonCancel_clicked
   Description:退出设置界面
   Calls: 
   Called By:
@@ -197,7 +202,7 @@ void Weld::on_confirmPushButton_clicked()
   Return:       
   Others: 
 ******************************************************************************/
-void Weld::on_cancelPushButton_clicked()
+void Weld::on_pushButtonCancel_clicked()
 {
 	close();
 }

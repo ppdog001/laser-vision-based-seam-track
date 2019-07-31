@@ -71,8 +71,8 @@ void ImageAcquisition::run()
 		if(isTestingModeTriggered)	//isTestingModeTriggerd=trueÎª²âÊÔÄ£Ê½
 		{
 			int intNthImageNo;
-			int intTestingImageNum=39;
-			cv::string strTestingFilePath="..//Images//testing images//";
+			int intTestingImageNum=250;
+			cv::string strTestingFilePath="..//images//testing images//";
 			for(intNthImageNo=1;intNthImageNo<=intTestingImageNum;intNthImageNo++)
 			{
 				cv::string strNewfilePath=strTestingFilePath+std::to_string((long long)intNthImageNo)+".bmp";
@@ -84,7 +84,7 @@ void ImageAcquisition::run()
 
 				if(!isTestingModeTriggered)	break;
 
-				Sleep(500);;
+				Sleep(200);;
 			}
 			if(intNthImageNo==intTestingImageNum)	intNthImageNo=1;
 		}

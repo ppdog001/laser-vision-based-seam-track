@@ -1,11 +1,9 @@
 #include "tracksys.h"
-#include "var.h"
+#include "common.h"
 #include "dip.h"
 
-
-
-
-void dipTesting();
+void dipTesting1Frame();
+void dipTestingnFrames();
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
@@ -13,44 +11,43 @@ int main(int argc, char *argv[])
 	w.show();
 	return a.exec();
 
-	//dipTesting();
+	//dipTestingnFrames();
+	//dipTesting1Frame();
 	return 0;
 }
 
-void dipTesting(){
+void dipTestingnFrames(){
 	string filePath="..//Images//testing images//";
-	string savePath="..//Images//testing results//";
-	clock_t start,end;
-	start=clock();
-	for(int i=1;i<=39;i++)
+	//string savePath="..//Images//testing results//";
+	//clock_t start,end;
+	//start=clock();
+	for(int i=1;i<=250;i++)
 	{
-		
-		qDebug()<<"processing "<<i<<endl;
-
 		string newfilePath=filePath+to_string((long long)i)+".bmp";
 		Mat img=imread(newfilePath);
 
 		if(i==1)
 		{
-			DIP::getROIPosition(img,&DIP::roiX,&DIP::roiY);
-
+			DIP::setROISize(400,200);
+			DIP::locateROI(img);
 		}
 		DIP dip(img);
-
-		//将图片显示在右侧的方框
-
-		//imwrite(savePath+to_string((long long)i)+".jpg",dip.markImage);
-		//dip.examine(filePath,i);//一些储存功能
+		imshow("out",dip.mOutputImage);waitKey();
+		//imwrite(savePath+to_string((long long)i)+".tif",dip.thinnedImage);
 	}
-	end=clock();
-	qDebug()<<"Run time="<<(end-start)/CLOCKS_PER_SEC<<endl;
-
-
-	////单张图片测试
-	//clock_t start,end;
-	//start=clock();
-	//Mat img=imread("..//Images//testing images//1.bmp");
-	//DIP dipObj(img);
 	//end=clock();
 	//qDebug()<<"Run time="<<(end-start)/CLOCKS_PER_SEC<<endl;
+}
+
+void dipTesting1Frame()
+{
+	string filePath="..//images//test//0.bmp";
+	Mat img=imread(filePath);
+	
+	DIP::setROISize(400,200);
+	DIP::locateROI(img);
+	DIP dip(img);
+
+	//imshow("result",dip.mOutputImage);
+	waitKey();
 }

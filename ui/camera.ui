@@ -47,7 +47,7 @@
       <x>10</x>
       <y>20</y>
       <width>251</width>
-      <height>31</height>
+      <height>24</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -60,15 +60,21 @@
      </item>
      <item>
       <widget class="QSlider" name="horizontalSliderGamma">
+       <property name="minimum">
+        <number>3</number>
+       </property>
+       <property name="maximum">
+        <number>20</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="space1">
+      <widget class="QLabel" name="labelGammaValue">
        <property name="text">
-        <string/>
+        <string>null</string>
        </property>
       </widget>
      </item>
@@ -93,15 +99,21 @@
      </item>
      <item>
       <widget class="QSlider" name="horizontalSliderContrast">
+       <property name="minimum">
+        <number>3</number>
+       </property>
+       <property name="maximum">
+        <number>20</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="space2">
+      <widget class="QLabel" name="labelContrastValue">
        <property name="text">
-        <string/>
+        <string>null</string>
        </property>
       </widget>
      </item>
@@ -140,13 +152,13 @@
         <bool>true</bool>
        </property>
        <property name="minimum">
-        <number>8</number>
+        <number>1</number>
        </property>
        <property name="maximum">
-        <number>63</number>
+        <number>32</number>
        </property>
        <property name="value">
-        <number>8</number>
+        <number>1</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -154,9 +166,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="space3">
+      <widget class="QLabel" name="labelGainValue">
        <property name="text">
-        <string/>
+        <string>null</string>
        </property>
       </widget>
      </item>
@@ -198,7 +210,7 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>2000</number>
+        <number>4000</number>
        </property>
        <property name="sliderPosition">
         <number>8</number>
@@ -209,9 +221,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="space4">
+      <widget class="QLabel" name="labelExposureValue">
        <property name="text">
-        <string/>
+        <string>null</string>
        </property>
       </widget>
      </item>

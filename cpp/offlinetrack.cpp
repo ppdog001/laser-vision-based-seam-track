@@ -299,12 +299,12 @@ void OfflineTrack::on_pushButtonAnalyzeData_clicked()
 
 		if(i==0)
 		{
-			DIP::getROIPosition(image,&DIP::roiX,&DIP::roiY);
+			DIP::locateROI(image);
 
 		}
 		DIP dip(image);
-		double offset=dip.seaminfo.dWeldSeamOffset;
-		absOffsetList.push_back(dip.seaminfo.dWeldSeamOffset);
+		double offset=dip.seamProfileInfo.dWeldSeamOffset;
+		absOffsetList.push_back(dip.seamProfileInfo.dWeldSeamOffset);
 	}
 
 	qDebug()<<"the last abs offset is"<<absOffsetList[dataNum-1];

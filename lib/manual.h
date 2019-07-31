@@ -29,7 +29,7 @@
 #ifndef _MANUAL_H
 #define _MANUAL_H
 
-#include "var.h"
+#include "common.h"
 #include "ui_manual.h"
 #include "motion.h"
 
